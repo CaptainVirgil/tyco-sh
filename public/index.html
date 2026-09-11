@@ -205,6 +205,54 @@
 
       /* API ------------------------------------------------------------- */
 
+      #api-details > summary {
+        /* Same type as an h2 so the page reads as one system whether the
+           section is open or shut. */
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 1.1rem;
+      }
+
+      #api-details > summary::-webkit-details-marker {
+        display: none;
+      }
+
+      #api-details > summary::before {
+        content: '+';
+        font-size: 0.9rem;
+        line-height: 1;
+        color: var(--accent);
+      }
+
+      #api-details[open] > summary::before {
+        content: '\2212'; /* minus */
+      }
+
+      #api-details > summary:hover {
+        color: var(--ink-dim);
+      }
+
+      #api-details > summary:focus-visible {
+        outline: 1px solid var(--accent);
+        outline-offset: 3px;
+      }
+
+      #api-details .count {
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--ink-faint);
+        font-weight: 400;
+      }
+
       .api > li {
         list-style: none;
         border-top: 1px solid var(--rule);
@@ -355,16 +403,21 @@
         </p>
       </section>
 
-      <section id="api">
-        <h2>The API</h2>
-        <ul class="api" id="api-list">
-          <li><span class="desc">loading…</span></li>
-        </ul>
-      </section>
-
       <section id="bio">
         <h2>Off the clock</h2>
         <ul class="bio" id="bio-list"></ul>
+      </section>
+
+      <section id="api">
+        <details id="api-details">
+          <summary>
+            <span>The API</span>
+            <span class="count" id="api-count"></span>
+          </summary>
+          <ul class="api" id="api-list">
+            <li><span class="desc">loading…</span></li>
+          </ul>
+        </details>
       </section>
 
       <section id="elsewhere">
@@ -520,7 +573,32 @@
         return li;
       }
 
-      loadEndpoints();
+      // Deferred: the list is collapsed by default, so there is no reason to
+      // fetch it until someone asks for it. The count comes along for free.
+      const details = document.getElementById('api-details');
+      const countEl = document.getElementById('api-count');
+      let loaded = false;
+
+      async function ensureEndpoints() {
+        if (loaded) return;
+        loaded = true;
+        await loadEndpoints();
+      }
+
+      details.addEventListener('toggle', () => {
+        if (details.open) ensureEndpoints();
+      });
+
+      // The count is worth showing while shut — it says the section is worth
+      // opening, which a bare "The API" does not.
+      fetch('/api/endpoints')
+        .then((r) => r.json())
+        .then(({ endpoints }) => {
+          countEl.textContent = `${endpoints.length} endpoints`;
+        })
+        .catch(() => {
+          countEl.textContent = '';
+        });
 
       // The live band. Absent numbers render as an em-dash, never as zero —
       // zero watts is a claim about the rack, a dash is a claim about us.
