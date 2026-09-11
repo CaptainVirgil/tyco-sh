@@ -266,6 +266,28 @@
         color: var(--ink-dim);
       }
 
+      /* Bio --------------------------------------------------------------- */
+
+      .bio {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        color: var(--ink-dim);
+        font-size: 0.95rem;
+      }
+
+      .bio li {
+        padding: 0.3rem 0 0.3rem 1rem;
+        position: relative;
+      }
+
+      .bio li::before {
+        content: '·';
+        position: absolute;
+        left: 0.15rem;
+        color: var(--accent);
+      }
+
       /* Elsewhere / footer ---------------------------------------------- */
 
       .elsewhere {
@@ -307,7 +329,7 @@
           <div class="stat"><div class="v">—</div><div class="k">nodes</div></div>
           <div class="stat"><div class="v">—</div><div class="k">rack °C</div></div>
           <div class="stat"><div class="v">—</div><div class="k">draw W</div></div>
-          <div class="stat"><div class="v">—</div><div class="k">servers up</div></div>
+          <div class="stat"><div class="v">—</div><div class="k">game servers</div></div>
         </div>
         <p class="band-note" id="band-note">no snapshot yet — the pipeline isn’t built</p>
       </section>
@@ -338,6 +360,11 @@
         <ul class="api" id="api-list">
           <li><span class="desc">loading…</span></li>
         </ul>
+      </section>
+
+      <section id="bio">
+        <h2>Off the clock</h2>
+        <ul class="bio" id="bio-list"></ul>
       </section>
 
       <section id="elsewhere">
@@ -379,6 +406,13 @@
         ],
       ];
 
+      const BIO = [
+        'Full-time dad and husband first; everything on this page happens after bedtime.',
+        'Been taking computers apart since I was nine and never really stopped.',
+        'Plays hockey.',
+        'Favourite show is The Expanse, which is where this domain got its name.',
+      ];
+
       const ELSEWHERE = [
         ['https://stacksavr.com', 'stacksavr.com', 'my MSP — flat-rate IT for small business'],
         ['https://runegateway.com', 'runegateway.com', 'a CSS animation and nothing else'],
@@ -405,6 +439,13 @@
         p.textContent = line;
         li.append(h3, p);
         workList.append(li);
+      }
+
+      const bioList = document.getElementById('bio-list');
+      for (const line of BIO) {
+        const li = document.createElement('li');
+        li.textContent = line;
+        bioList.append(li);
       }
 
       const elsewhere = document.getElementById('elsewhere-list');
@@ -489,7 +530,7 @@
         ['nodes', (d) => d.cluster.nodes],
         ['rack °C', (d) => d.rack.inlet_c],
         ['draw W', (d) => d.rack.draw_w],
-        ['servers up', (d) => surveyedUp(d.games.servers)],
+        ['game servers', (d) => surveyedUp(d.games.servers)],
       ];
 
       // "0" with four unknowns reads as four servers down. The denominator is

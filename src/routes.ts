@@ -4,6 +4,7 @@ import { hire } from './api/hire';
 import { coffee, isItDns, itWasNotDns } from './api/jokes';
 import { snapshot } from './api/live';
 import { games, pz, rack } from './api/readings';
+import { uptime } from './api/uptime';
 import { json } from './respond';
 
 /**
@@ -83,6 +84,12 @@ export const ROUTES: Route[] = [
     describe: 'every live number at once',
     live: true,
     handler: snapshot,
+  },
+  {
+    path: '/api/uptime',
+    describe: 'availability measured from outside, and how much history stands behind it',
+    live: true,
+    handler: uptime,
   },
   {
     path: '/api/rack',

@@ -15,7 +15,7 @@ export async function rootText(env: Env): Promise<Response> {
   const lines: string[] = [];
 
   lines.push('  ' + ASCII);
-  lines.push(`  ${IDENTITY.name.toLowerCase()} · infrastructure · indiana`);
+  lines.push(`  ${IDENTITY.name.toLowerCase()} · ${IDENTITY.tagline.toLowerCase()}`);
   lines.push('');
 
   if (live.state === 'dark') {
@@ -39,7 +39,7 @@ export async function rootText(env: Env): Promise<Response> {
     if (draw !== null) rackParts.push(`${draw}W`);
     lines.push(`  ${'rack'.padEnd(11)}${rackParts.length ? rackParts.join(', ') : '—'}`);
 
-    lines.push(`  ${'servers'.padEnd(11)}${serverLine(s.games.servers)}`);
+    lines.push(`  ${'games'.padEnd(11)}${serverLine(s.games.servers)}`);
     lines.push(`  ${'oncall'.padEnd(11)}virgil (perpetual, bus factor 1)`);
     lines.push(`  ${'dns'.padEnd(11)}suspect`);
     if (live.state === 'stale') {

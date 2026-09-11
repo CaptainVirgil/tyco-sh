@@ -196,7 +196,7 @@ describe('unknown is not down', () => {
     });
     const body = await res.text();
 
-    expect(body).toContain('0 of 1 up, 2 unknown');
+    expect(body).toContain('games      0 of 1 up, 2 unknown');
     expect(body).not.toContain('0 of 3 up');
   });
 

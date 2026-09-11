@@ -29,6 +29,20 @@ export const CAPABILITIES: ReadonlyArray<{ group: string; detail: string }> = [
   { group: 'games', detail: 'five servers, systemd-owned, one panel I wrote' },
 ];
 
+/**
+ * The person, briefly. It sits under the work rather than over it: the page
+ * should establish what he does before it gets personal.
+ *
+ * The Expanse line is doing quiet double duty — it is true, and it explains
+ * the domain without the site ever having to be themed around it.
+ */
+export const BIO: readonly string[] = [
+  'Full-time dad and husband first; everything on this page happens after bedtime.',
+  'Been taking computers apart since I was nine and never really stopped.',
+  'Plays hockey.',
+  'Favourite show is The Expanse, which is where this domain got its name.',
+];
+
 /** Lead with the constraint. Feature lists are forgettable; constraints are not. */
 export const WORK: ReadonlyArray<{ name: string; line: string }> = [
   {

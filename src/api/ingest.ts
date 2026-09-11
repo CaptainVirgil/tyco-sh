@@ -1,3 +1,4 @@
+import { recordArrival } from '../availability';
 import { KNOWN_CONTRACTS } from '../contract';
 import { KV_KEY, TTL_S, type Snapshot } from '../snapshot';
 import type { Env } from '../types';
@@ -57,7 +58,25 @@ export async function ingest(request: Request, env: Env): Promise<Response> {
   if (skewS < -MAX_SKEW_S) return refuse(400, 'as_of is in the future');
   if (skewS > MAX_SKEW_S) return refuse(400, 'as_of is too old to be a push');
 
+  // Read before overwriting: the outgoing snapshot's as_of is the exact time of
+  // the last arrival, which is what makes gap detection free.
+  let prevAsOf: string | null = null;
+  try {
+    const prev = await env.SNAPSHOT.get<Snapshot>(KV_KEY, 'json');
+    prevAsOf = prev?.as_of ?? null;
+  } catch {
+    // A read that failed is not a reason to refuse a good push.
+  }
+
   await env.SNAPSHOT.put(KV_KEY, body, { expirationTtl: TTL_S });
+
+  // After the snapshot, and never in a way that can fail the push: the
+  // availability record is a nice-to-have and the snapshot is the point.
+  try {
+    await recordArrival(env, prevAsOf, snapshot.as_of);
+  } catch {
+    // Deliberately swallowed. A push that stored the snapshot succeeded.
+  }
 
   return new Response(JSON.stringify({ stored: true, ttl_s: TTL_S }) + '\n', {
     status: 200,
