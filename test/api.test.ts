@@ -1,5 +1,6 @@
 import { SELF } from 'cloudflare:test';
 import { describe, expect, it } from 'vitest';
+import { CONTRACT } from '../src/contract';
 
 const CURL = { 'User-Agent': 'curl/8.5.0', Accept: '*/*' };
 const BROWSER = {
@@ -129,7 +130,9 @@ describe('router', () => {
 
   it('stamps the contract on every API response', async () => {
     const res = await SELF.fetch('https://tyco.sh/api/is-it-dns');
-    expect(res.headers.get('X-Tyco-Contract')).toBe('1');
+    // Against the constant, not a literal — a literal here goes stale the
+    // moment the contract moves, and the test then asserts the wrong thing.
+    expect(res.headers.get('X-Tyco-Contract')).toBe(String(CONTRACT));
   });
 });
 

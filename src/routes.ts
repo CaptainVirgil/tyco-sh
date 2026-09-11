@@ -5,6 +5,7 @@ import { coffee, isItDns, itWasNotDns } from './api/jokes';
 import { snapshot } from './api/live';
 import { games, pz, rack } from './api/readings';
 import { uptime } from './api/uptime';
+import { yak } from './api/yak';
 import { json } from './respond';
 
 /**
@@ -84,6 +85,12 @@ export const ROUTES: Route[] = [
     describe: 'every live number at once',
     live: true,
     handler: snapshot,
+  },
+  {
+    path: '/api/yak',
+    describe: 'how much is half-finished',
+    live: true,
+    handler: yak,
   },
   {
     path: '/api/uptime',

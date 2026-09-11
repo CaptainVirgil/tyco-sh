@@ -18,10 +18,10 @@ export async function snapshot(_request: Request, _url: URL, env: Env): Promise<
     return json(
       {
         ...envelope,
-        cluster: { nodes: null, nodes_ready: null, containers: null },
-        rack: { inlet_c: null, draw_w: null, fans_rpm: null },
+        cluster: { nodes: null, nodes_ready: null, pods: null },
+        rack: { inlet_c: null, draw_w: null, fans_rpm: null, chassis: null },
         games: { servers: [] },
-        yak: { depth: null, deepest_this_month: null },
+        yak: { branches: null, repos: null },
       },
       { maxAge: 0 },
     );

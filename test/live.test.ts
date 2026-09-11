@@ -8,7 +8,7 @@ function validSnapshot(overrides: Record<string, unknown> = {}) {
   return {
     contract: 1,
     as_of: new Date().toISOString(),
-    cluster: { nodes: 6, nodes_ready: 6, containers: 145 },
+    cluster: { nodes: 6, nodes_ready: 6, pods: 145 },
     rack: {
       inlet_c: 21.5,
       draw_w: 410,
@@ -16,7 +16,7 @@ function validSnapshot(overrides: Record<string, unknown> = {}) {
       chassis: 'a 2U dual-socket server',
     },
     games: { servers: [{ alias: 'project zomboid', up: true, players: 3, max: 16 }] },
-    yak: { depth: 4, deepest_this_month: 9 },
+    yak: { branches: 16, repos: 4 },
     ...overrides,
   };
 }
@@ -301,5 +301,29 @@ describe('the individual readings agree with the snapshot', () => {
       up: number;
     }>();
     expect(r).toMatchObject({ total: 3, surveyable: 1, unknown: 2, up: 0 });
+  });
+});
+
+describe('/api/snapshot keeps the same shape dark or live', () => {
+  // The dark branch once said `containers` where the live branch said `pods`.
+  // An endpoint that renames its own fields depending on whether data arrived
+  // is unusable by anything parsing it.
+  it('uses identical keys either way', async () => {
+    await push(validSnapshot());
+    const live = await (
+      await SELF.fetch('https://tyco.sh/api/snapshot')
+    ).json<Record<string, unknown>>();
+
+    await env.SNAPSHOT.delete(KV_KEY);
+    const dark = await (
+      await SELF.fetch('https://tyco.sh/api/snapshot')
+    ).json<Record<string, unknown>>();
+
+    const keys = (o: Record<string, unknown>, k: string) =>
+      Object.keys((o[k] ?? {}) as Record<string, unknown>).sort();
+
+    for (const section of ['cluster', 'rack', 'yak']) {
+      expect(keys(dark, section), section).toEqual(keys(live, section));
+    }
   });
 });

@@ -29,9 +29,16 @@ export interface Snapshot {
   games: {
     servers: GameServer[];
   };
+  /**
+   * Unfinished work: branches that are not their repository's default.
+   *
+   * This was open issues and pull requests until the count turned out to be
+   * zero across every repository — publishing that would have been a confident
+   * 0 that actually meant "nothing to measure".
+   */
   yak: {
-    depth: number | null;
-    deepest_this_month: number | null;
+    branches: number | null;
+    repos: number | null;
   };
 }
 

@@ -8,7 +8,9 @@
  *
  * Bump on any change to the snapshot's shape. Never on copy or styling.
  */
-export const CONTRACT = 1;
+export const CONTRACT = 2;
 
 /** Contracts this Worker can read. Keep the current one, plus any it can still parse. */
-export const KNOWN_CONTRACTS: readonly number[] = [1];
+export const KNOWN_CONTRACTS: readonly number[] = [1, 2];
+// 1 is still readable: it differs only in the shape of `yak`, which was always
+// null under it. A stored contract-1 snapshot renders correctly with yak absent.
