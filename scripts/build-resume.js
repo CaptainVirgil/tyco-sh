@@ -57,27 +57,72 @@ function plaintext(r) {
     b.label,
     `${b.location.city}, ${b.location.region}`,
     b.email,
+    // One per line: joined, these run past 80 columns, and the whole point of
+    // the plaintext form is that it fits a terminal.
+    ...(r.basics.profiles || []).map((p) => p.url.replace(/^https?:\/\//, '')),
     '',
     wrap(b.summary, 78),
     '',
   ];
 
+  if (r.work?.length) {
+    lines.push('EXPERIENCE');
+    for (const w of r.work) {
+      lines.push('');
+      lines.push(`  ${w.position}`);
+      lines.push(`  ${w.name} — ${w.location} · ${span(w)}`);
+      for (const h of w.highlights || []) {
+        lines.push(bullet(h, 72, '    '));
+      }
+    }
+    lines.push('');
+  }
+
   if (r.projects?.length) {
     lines.push('PROJECTS');
     for (const p of r.projects) {
-      lines.push('', `  ${p.name} — ${p.keywords.join(', ')}`, wrap(p.description, 74, '  '));
+      lines.push('');
+      lines.push(`  ${p.name} — ${p.keywords.join(', ')}`);
+      lines.push(wrap(p.description, 74, '  '));
     }
     lines.push('');
   }
 
   if (r.skills?.length) {
     lines.push('SKILLS');
-    for (const s of r.skills) lines.push(wrap(`${s.name}: ${s.keywords.join(', ')}`, 74, '  '));
+    for (const s of r.skills) {
+      lines.push('');
+      lines.push(wrap(`${s.name}: ${s.keywords.join(', ')}`, 74, '  '));
+    }
+    lines.push('');
+  }
+
+  if (r.certificates?.length) {
+    lines.push('CERTIFICATIONS');
+    for (const c of r.certificates) lines.push(`  ${c.name}`);
     lines.push('');
   }
 
   lines.push(`-- ${r.meta.note}`, `-- version ${r.meta.version}`);
   return lines.join('\n') + '\n';
+}
+
+/** "Dec 2025 – present" from JSON Resume's YYYY-MM (or bare YYYY) dates. */
+function span(w) {
+  const fmt = (d) => {
+    if (!d) return null;
+    const [y, m] = d.split('-');
+    if (!m) return y;
+    const months = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+    return `${months[Number(m) - 1]} ${y}`;
+  };
+  return `${fmt(w.startDate)} – ${fmt(w.endDate) ?? 'present'}`;
+}
+
+function bullet(text, width, indent) {
+  const wrapped = wrap(text, width, indent).split('\n');
+  wrapped[0] = indent.slice(2) + '- ' + wrapped[0].slice(indent.length);
+  return wrapped.join('\n');
 }
 
 function wrap(s, width, indent = '') {

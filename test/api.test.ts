@@ -72,15 +72,21 @@ describe('/api/hire', () => {
     expect(res.headers.get('Location')).toContain('/#work');
   });
 
-  it('never consults a binding — it must answer when the house is dark', async () => {
-    // A crude but honest check: the handler module imports no binding at all.
-    const src = await import('../src/api/hire');
-    expect(typeof src.hire).toBe('function');
-    const res = await src.hire(
-      new Request('https://tyco.sh/api/hire'),
+  it('answers with JSON even when the asset store is empty', async () => {
+    // The plaintext form is a served asset; if it is missing, hire must still
+    // answer rather than 500. It is the one endpoint that always has to work.
+    const { hire } = await import('../src/api/hire');
+    const noAssets = {
+      ASSETS: { fetch: async () => new Response('nope', { status: 404 }) },
+    } as unknown as Parameters<typeof hire>[2];
+
+    const res = await hire(
+      new Request('https://tyco.sh/api/hire', { headers: { Accept: 'text/plain' } }),
       new URL('https://tyco.sh/'),
+      noAssets,
     );
     expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toContain('application/json');
   });
 });
 

@@ -1,17 +1,22 @@
 import resume from '../../data/resume.json';
 import { prefers } from '../negotiate';
-import { json, text } from '../respond';
+import { json } from '../respond';
+import type { Env } from '../types';
 
 /**
  * The one endpoint that must answer with the rack unplugged, the cluster down
- * and KV empty. It reads a file compiled into this bundle and touches nothing
- * else — no binding, no fetch, no snapshot. Keep it that way.
+ * and KV empty. It reads a file compiled into this bundle and an asset served
+ * beside it — no binding to the snapshot store, no fetch to anything outside.
+ * Keep it that way.
  *
  * It is JSON Resume rather than a shape of our own so that
- * `curl -s tyco.sh/api/hire | jq '.work[0]'` works without reading any docs,
- * and so the page, the plaintext and the PDF all derive from one file.
+ * `curl -s tyco.sh/api/hire | jq '.work[0]'` works without reading any docs.
+ *
+ * The plaintext form is the built `resume.txt` asset rather than a second
+ * formatter living here. Two formatters would drift, and the whole point of
+ * one source file is that the JSON, the text and the PDF cannot disagree.
  */
-export function hire(request: Request, url: URL): Response {
+export async function hire(request: Request, url: URL, env: Env): Promise<Response> {
   const wantsPdf = prefers(request, 'application/pdf') > prefers(request, 'application/json');
   if (wantsPdf) {
     return Response.redirect(new URL('/resume.pdf', url).toString(), 302);
@@ -26,59 +31,19 @@ export function hire(request: Request, url: URL): Response {
   }
 
   if (prefers(request, 'text/plain') > prefers(request, 'application/json')) {
-    return text(plaintext(), { maxAge: 3600 });
+    const res = await env.ASSETS.fetch(new URL('/resume.txt', url));
+    if (res.ok) {
+      return new Response(res.body, {
+        status: 200,
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Cache-Control': 'public, max-age=3600',
+        },
+      });
+    }
+    // The asset is missing — fall through to JSON rather than 500. Something
+    // is better than nothing from the one endpoint that must always answer.
   }
 
   return json(resume, { maxAge: 3600 });
-}
-
-/** 80 columns, because the thing asking for text/plain is a terminal. */
-function plaintext(): string {
-  const b = resume.basics;
-  const out: string[] = [];
-
-  out.push(b.name);
-  out.push(b.label);
-  out.push(`${b.location.city}, ${b.location.region}`);
-  out.push(b.email);
-  out.push('');
-  out.push(wrap(b.summary, 78));
-  out.push('');
-
-  if (resume.projects.length) {
-    out.push('PROJECTS');
-    for (const p of resume.projects) {
-      out.push('');
-      out.push(`  ${p.name} — ${p.keywords.join(', ')}`);
-      out.push(wrap(p.description, 74, '  '));
-    }
-    out.push('');
-  }
-
-  if (resume.skills.length) {
-    out.push('SKILLS');
-    for (const s of resume.skills) {
-      out.push(wrap(`${s.name}: ${s.keywords.join(', ')}`, 74, '  '));
-    }
-    out.push('');
-  }
-
-  out.push(`-- ${resume.meta.note}`);
-  return out.join('\n');
-}
-
-function wrap(s: string, width: number, indent = ''): string {
-  const words = s.split(/\s+/);
-  const lines: string[] = [];
-  let line = '';
-  for (const w of words) {
-    if (line && line.length + 1 + w.length > width) {
-      lines.push(indent + line);
-      line = w;
-    } else {
-      line = line ? `${line} ${w}` : w;
-    }
-  }
-  if (line) lines.push(indent + line);
-  return lines.join('\n');
 }
