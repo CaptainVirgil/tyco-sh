@@ -10,12 +10,13 @@
 
   "observability": { "enabled": true, "head_sampling_rate": 1 },
 
-  // run_worker_first, because the whole point of `/` is that the Worker
-  // decides whether you get HTML or plain text. Left to the asset server,
-  // index.html would win before any of that ran.
+  // run_worker_first is a path list, not `true`: `/` must reach the Worker so
+  // it can choose HTML or plain text, and /api/* is all Worker. Everything
+  // else — stylesheets, the PDF, favicons — is served straight off the asset
+  // store without ever waking the Worker.
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    "run_worker_first": true
+    "run_worker_first": ["/", "/api/*"]
   }
 }
