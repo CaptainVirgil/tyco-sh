@@ -6,7 +6,10 @@ const DEFAULT_MAX_AGE = 30;
 function baseHeaders(maxAge: number): Record<string, string> {
   return {
     'X-Tyco-Contract': String(CONTRACT),
-    'Cache-Control': `public, max-age=${maxAge}`,
+    // maxAge 0 means "this answer is supposed to differ every call" — a cached
+    // /api/blame would pick one component and then insist on it forever, which
+    // is a different joke and a worse one.
+    'Cache-Control': maxAge <= 0 ? 'no-store' : `public, max-age=${maxAge}`,
   };
 }
 

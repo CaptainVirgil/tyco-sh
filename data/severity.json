@@ -1,0 +1,29 @@
+{
+  "note": "The ladder is real and so are the first steps. The runbooks themselves are not published — they describe a private estate — and `runbook: documented, not published` is the honest way to say that rather than pretending they do not exist.",
+  "levels": [
+    {
+      "severity": "sev1",
+      "definition": "data is at risk, or something irreplaceable is not being recorded",
+      "first_step": "stop the thing that is still writing before diagnosing the thing that broke",
+      "runbook": "documented, not published"
+    },
+    {
+      "severity": "sev2",
+      "definition": "degraded, someone notices, no data at risk",
+      "first_step": "establish whether the exporter is down or the thing it exports is down — they look identical from here",
+      "runbook": "documented, not published"
+    },
+    {
+      "severity": "sev3",
+      "definition": "an alert fired and nothing is actually wrong",
+      "first_step": "fix the alert, not the service; a rule that cries wolf is the outage",
+      "runbook": "documented, not published"
+    },
+    {
+      "severity": "sev4",
+      "definition": "noticed in passing, nothing is on fire",
+      "first_step": "write the row before fixing it, or the fix will be the only record",
+      "runbook": "documented, not published"
+    }
+  ]
+}

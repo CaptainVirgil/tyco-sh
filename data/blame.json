@@ -1,0 +1,24 @@
+{
+  "note": "Counts are real: every closed row in a private incident register, bucketed by the component that turned out to be at fault. Names are aliased on purpose — the shape of the estate is not public information. Weights are baked at build time, never queried live.",
+  "total": 86,
+  "components": [
+    { "name": "the orchestrator", "count": 13 },
+    { "name": "the backups", "count": 13 },
+    { "name": "the auth layer", "count": 11 },
+    { "name": "the documentation", "count": 7 },
+    { "name": "the reconciler", "count": 6 },
+    { "name": "the alerting", "count": 6 },
+    { "name": "the secret store", "count": 5 },
+    { "name": "a pinned version", "count": 4 },
+    { "name": "the firewall", "count": 3 },
+    { "name": "the tooling", "count": 3 },
+    { "name": "the storage layer", "count": 3 },
+    { "name": "the hardware", "count": 3 },
+    { "name": "DNS", "count": 2 },
+    { "name": "a codec", "count": 2 },
+    { "name": "something slower than its own timeout", "count": 2 },
+    { "name": "the metrics pipeline", "count": 1 },
+    { "name": "the kernel", "count": 1 },
+    { "name": "ssh", "count": 1 }
+  ]
+}

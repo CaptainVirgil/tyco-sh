@@ -1,0 +1,75 @@
+{
+  "note": "Every entry marked actually_happened: true is a real failure from a private incident register or a project post-mortem, with its coordinates stripped — the shape of the mistake, never where it lives. If an invented entry is ever added it must be marked false. The site's whole premise is that the numbers and the stories are real; one fabrication labelled real would spend credit that cannot be earned back.",
+  "excuses": [
+    {
+      "excuse": "the liveness probe timed out faster than the thing it was probing",
+      "actually_happened": true,
+      "cost": "109 restarts in one day"
+    },
+    {
+      "excuse": "the CPU limit shaped the burst, not the average",
+      "actually_happened": true,
+      "cost": "a job averaging well under its limit stalled anyway, inside each 100ms window"
+    },
+    {
+      "excuse": "the backup was written successfully and never read back",
+      "actually_happened": true,
+      "cost": "an archiver exiting 0 says the writer did not fail, and nothing else"
+    },
+    {
+      "excuse": "a directory listing was mistaken for an ownership claim",
+      "actually_happened": true,
+      "cost": "a retention sweep counted a file nobody generated and deleted three real backups"
+    },
+    {
+      "excuse": "the log command printed nothing and exited 0",
+      "actually_happened": true,
+      "cost": "a silent reader read as a silent service, for as long as it took to notice"
+    },
+    {
+      "excuse": "the scheduled job ran as root because nobody had written down who it should run as",
+      "actually_happened": true,
+      "cost": "invisible to its own audit log until someone went looking"
+    },
+    {
+      "excuse": "an unreadable table was reported as an empty one",
+      "actually_happened": true,
+      "cost": "six sightings across two projects; the sixth deleted data"
+    },
+    {
+      "excuse": "the credential was passed in argv, where anyone listing processes could read it",
+      "actually_happened": true,
+      "cost": "found during a hardening pass, not by an attacker"
+    },
+    {
+      "excuse": "DNS search-domain expansion ate a hostname with the wrong number of dots",
+      "actually_happened": true,
+      "cost": "resolved to nothing, quietly, on a schedule"
+    },
+    {
+      "excuse": "a process-matching kill pattern matched the shell that was running it",
+      "actually_happened": true,
+      "cost": "the script killed its own parent"
+    },
+    {
+      "excuse": "the installer exits non-zero on its first run on purpose",
+      "actually_happened": true,
+      "cost": "one bootstrap treated as a failure for longer than it should have been"
+    },
+    {
+      "excuse": "the row read as settled, so nobody re-read it",
+      "actually_happened": true,
+      "cost": "closed on two claims that were both false; thirteen days before anyone checked"
+    },
+    {
+      "excuse": "the database file was world-readable",
+      "actually_happened": true,
+      "cost": "no consequence, which is the only reason it is funny"
+    },
+    {
+      "excuse": "two different facts were rendered as the same word",
+      "actually_happened": true,
+      "cost": "the recurring one. it has cost time on every single sighting"
+    }
+  ]
+}

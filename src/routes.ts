@@ -1,4 +1,5 @@
 import type { Route } from './types';
+import { blame, excuse, oncall, severity } from './api/baked';
 import { hire } from './api/hire';
 import { coffee, isItDns, itWasNotDns } from './api/jokes';
 import { json } from './respond';
@@ -38,6 +39,30 @@ export const ROUTES: Route[] = [
     describe: 'returns 418',
     live: false,
     handler: coffee,
+  },
+  {
+    path: '/api/oncall',
+    describe: 'who is on call',
+    live: false,
+    handler: oncall,
+  },
+  {
+    path: '/api/blame',
+    describe: 'a component, weighted by how often it actually was the component',
+    live: false,
+    handler: blame,
+  },
+  {
+    path: '/api/excuse',
+    describe: 'a real failure, with its coordinates removed',
+    live: false,
+    handler: excuse,
+  },
+  {
+    path: '/api/severity',
+    describe: 'a severity, and the first thing you would actually do',
+    live: false,
+    handler: severity,
   },
 ];
 
