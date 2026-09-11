@@ -10,6 +10,12 @@
 
   "observability": { "enabled": true, "head_sampling_rate": 1 },
 
+  // One key, `snapshot`, written by the emitter inside the LAN and read here.
+  // Its TTL is the honesty mechanism: if the emitter dies the key expires and
+  // the edge has nothing to serve but the truth. It cannot quietly serve
+  // month-old numbers, because after fifteen minutes there is nothing to serve.
+  "kv_namespaces": [{ "binding": "SNAPSHOT", "id": "492933f279c14860b8c258f8cccd5e9e" }],
+
   // run_worker_first is a path list, not `true`: `/` must reach the Worker so
   // it can choose HTML or plain text, and /api/* is all Worker. Everything
   // else — stylesheets, the PDF, favicons — is served straight off the asset
@@ -17,6 +23,6 @@
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
-    "run_worker_first": ["/", "/api/*"]
+    "run_worker_first": ["/", "/api/*", "/_ingest"]
   }
 }

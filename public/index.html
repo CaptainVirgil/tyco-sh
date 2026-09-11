@@ -467,6 +467,67 @@
       }
 
       loadEndpoints();
+
+      // The live band. Absent numbers render as an em-dash, never as zero —
+      // zero watts is a claim about the rack, a dash is a claim about us.
+      const BAND = [
+        // availability needs a rolling history the edge does not keep yet (M4).
+        ['availability', () => null],
+        ['nodes', (d) => d.cluster.nodes],
+        ['rack °C', (d) => d.rack.inlet_c],
+        ['draw W', (d) => d.rack.draw_w],
+        ['servers up', (d) => (d.games.servers.length ? countUp(d.games.servers) : null)],
+      ];
+
+      function countUp(servers) {
+        return servers.filter((g) => g.up === true).length;
+      }
+
+      async function loadBand() {
+        const band = document.getElementById('band');
+        const note = document.getElementById('band-note');
+
+        let d;
+        try {
+          const res = await fetch('/api/snapshot');
+          d = await res.json();
+        } catch {
+          note.textContent = 'could not reach the API';
+          return;
+        }
+
+        band.replaceChildren(
+          ...BAND.map(([label, pick]) => {
+            let v;
+            try {
+              v = pick(d);
+            } catch {
+              v = null;
+            }
+            const cell = document.createElement('div');
+            cell.className = 'stat';
+            const val = document.createElement('div');
+            val.className = 'v';
+            val.textContent = v === null || v === undefined ? '—' : String(v);
+            const key = document.createElement('div');
+            key.className = 'k';
+            key.textContent = label;
+            cell.append(val, key);
+            return cell;
+          }),
+        );
+
+        if (d.note) {
+          note.textContent = d.note;
+        } else if (d.stale) {
+          note.textContent = `these numbers are ${Math.round((d.age_s ?? 0) / 60)} minutes old`;
+        } else {
+          note.textContent = `as of ${new Date(d.as_of).toLocaleTimeString()}`;
+        }
+      }
+
+      loadBand();
+      setInterval(loadBand, 60000);
     </script>
   </body>
 </html>

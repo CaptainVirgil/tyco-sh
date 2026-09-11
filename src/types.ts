@@ -1,7 +1,22 @@
-export interface Env {
-  /** Static assets bound from ./public. */
-  ASSETS: Fetcher;
+/**
+ * Bindings.
+ *
+ * `Cloudflare.Env` is generated from wrangler.jsonc by `npm run types`, so the
+ * binding list cannot drift from the deploy config — add a binding there and
+ * the types follow. Secrets are the exception: they are deliberately absent
+ * from wrangler.jsonc (they live in `wrangler secret put`, never in git), so
+ * they are declared here by hand.
+ */
+declare global {
+  namespace Cloudflare {
+    interface Env {
+      /** Shared secret for PUT /_ingest. Unset means ingest fails closed. */
+      INGEST_TOKEN?: string;
+    }
+  }
 }
+
+export type Env = Cloudflare.Env;
 
 export type Handler = (request: Request, url: URL, env: Env) => Response | Promise<Response>;
 

@@ -4,7 +4,7 @@
     "lib": ["es2022"],
     "module": "es2022",
     "moduleResolution": "bundler",
-    "types": ["@cloudflare/workers-types", "vitest/globals"],
+    "types": ["vitest/globals"],
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
@@ -15,6 +15,6 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["src/**/*", "test/**/*", "data/**/*"],
+  "include": ["src/**/*", "test/**/*", "data/**/*", "worker-configuration.d.ts"],
   "exclude": ["node_modules", "dist"]
 }

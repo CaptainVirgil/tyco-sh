@@ -2,6 +2,7 @@ import type { Route } from './types';
 import { blame, excuse, oncall, severity } from './api/baked';
 import { hire } from './api/hire';
 import { coffee, isItDns, itWasNotDns } from './api/jokes';
+import { snapshot } from './api/live';
 import { json } from './respond';
 
 /**
@@ -63,6 +64,12 @@ export const ROUTES: Route[] = [
     describe: 'a severity, and the first thing you would actually do',
     live: false,
     handler: severity,
+  },
+  {
+    path: '/api/snapshot',
+    describe: 'every live number at once',
+    live: true,
+    handler: snapshot,
   },
 ];
 
