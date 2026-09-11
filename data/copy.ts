@@ -11,6 +11,7 @@ export const IDENTITY = {
   tagline: 'IT director · systems engineer · a rack in Indiana',
   email: 'guardian@runegateway.com',
   github: 'https://github.com/CaptainVirgil',
+  linkedin: 'https://www.linkedin.com/in/captainvirgil/',
 } as const;
 
 export const CAPABILITIES: ReadonlyArray<{ group: string; detail: string }> = [
@@ -48,8 +49,13 @@ export const WORK: ReadonlyArray<{ name: string; line: string }> = [
   },
 ];
 
-/** Two domains, both toys. They are here precisely because they are frivolous. */
+/**
+ * The business first, then the toys. The toys earn their place precisely by
+ * being frivolous — a page of clusters and rack sensors reads as humourless,
+ * and two pointless domains someone keeps paying for says otherwise.
+ */
 export const ELSEWHERE: ReadonlyArray<{ host: string; what: string }> = [
+  { host: 'stacksavr.com', what: 'my MSP — flat-rate IT for small business' },
   { host: 'runegateway.com', what: 'a CSS animation and nothing else' },
   { host: 'makeubutr.com', what: 'a reference to an old gamertag' },
 ];
