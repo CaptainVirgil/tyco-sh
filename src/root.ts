@@ -1,6 +1,6 @@
 import { ASCII, CAPABILITIES, IDENTITY } from '../data/copy';
 import { text } from './respond';
-import { readSnapshot } from './snapshot';
+import { readSnapshot, type GameServer } from './snapshot';
 import type { Env } from './types';
 
 /**
@@ -30,13 +30,16 @@ export async function rootText(env: Env): Promise<Response> {
     const nodes = s.cluster.nodes;
     const inlet = s.rack.inlet_c;
     const draw = s.rack.draw_w;
-    const up = s.games.servers.filter((g) => g.up === true).length;
 
     lines.push(`  ${'cluster'.padEnd(11)}${nodes === null ? '—' : `${nodes} nodes`}`);
-    lines.push(
-      `  ${'rack'.padEnd(11)}${inlet === null ? '—' : `${inlet}°C`}, ${draw === null ? '—' : `${draw}W`}`,
-    );
-    lines.push(`  ${'games'.padEnd(11)}${up} of ${s.games.servers.length} up`);
+
+    // One dash when the BMC said nothing at all, rather than "—, —".
+    const rackParts: string[] = [];
+    if (inlet !== null) rackParts.push(`${inlet}°C`);
+    if (draw !== null) rackParts.push(`${draw}W`);
+    lines.push(`  ${'rack'.padEnd(11)}${rackParts.length ? rackParts.join(', ') : '—'}`);
+
+    lines.push(`  ${'servers'.padEnd(11)}${serverLine(s.games.servers)}`);
     lines.push(`  ${'oncall'.padEnd(11)}virgil (perpetual, bus factor 1)`);
     lines.push(`  ${'dns'.padEnd(11)}suspect`);
     if (live.state === 'stale') {
@@ -58,4 +61,20 @@ export async function rootText(env: Env): Promise<Response> {
   lines.push('  a browser renders this more nicely, but not more honestly.');
 
   return text(lines.join('\n'), { maxAge: 0 });
+}
+
+/**
+ * "0 of 5 up" is a lie when four of the five have no liveness source: it reads
+ * as five servers down. Only the surveyable ones are counted, and the rest are
+ * named as unknown — a server nobody can survey is not a server that is down.
+ */
+function serverLine(servers: GameServer[]): string {
+  const surveyable = servers.filter((g) => g.up !== null);
+  const unknown = servers.length - surveyable.length;
+  const up = surveyable.filter((g) => g.up === true).length;
+
+  if (surveyable.length === 0) return `— (${servers.length} unknown)`;
+
+  const head = `${up} of ${surveyable.length} up`;
+  return unknown ? `${head}, ${unknown} unknown` : head;
 }

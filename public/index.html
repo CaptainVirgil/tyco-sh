@@ -476,11 +476,16 @@
         ['nodes', (d) => d.cluster.nodes],
         ['rack °C', (d) => d.rack.inlet_c],
         ['draw W', (d) => d.rack.draw_w],
-        ['servers up', (d) => (d.games.servers.length ? countUp(d.games.servers) : null)],
+        ['servers up', (d) => surveyedUp(d.games.servers)],
       ];
 
-      function countUp(servers) {
-        return servers.filter((g) => g.up === true).length;
+      // "0" with four unknowns reads as four servers down. The denominator is
+      // what can actually be surveyed; a server nobody can reach is not down.
+      function surveyedUp(servers) {
+        const surveyable = servers.filter((g) => g.up !== null);
+        if (!surveyable.length) return null;
+        const up = surveyable.filter((g) => g.up === true).length;
+        return `${up}/${surveyable.length}`;
       }
 
       async function loadBand() {

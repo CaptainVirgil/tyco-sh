@@ -171,3 +171,61 @@ describe('the baked endpoints survive a dark house', () => {
     expect((await res.json<{ basics: { name: string } }>()).basics.name).toBe('William Wolff');
   });
 });
+
+describe('unknown is not down', () => {
+  // The project's whole doctrine, at the one place a reader actually sees it.
+  // Four of the five game servers have no liveness source; rendering them as
+  // "0 of 5 up" would claim five servers are down.
+  it('counts only surveyable servers in the terminal view', async () => {
+    await push(
+      validSnapshot({
+        games: {
+          servers: [
+            { alias: 'project zomboid', up: false, players: null, max: null },
+            { alias: 'valheim', up: null, players: null, max: null },
+            { alias: 'minecraft', up: null, players: null, max: null },
+          ],
+        },
+      }),
+    );
+
+    const res = await SELF.fetch('https://tyco.sh/', {
+      headers: { 'User-Agent': 'curl/8.5.0', Accept: '*/*' },
+    });
+    const body = await res.text();
+
+    expect(body).toContain('0 of 1 up, 2 unknown');
+    expect(body).not.toContain('0 of 3 up');
+  });
+
+  it('says so plainly when nothing can be surveyed at all', async () => {
+    await push(
+      validSnapshot({
+        games: {
+          servers: [
+            { alias: 'valheim', up: null, players: null, max: null },
+            { alias: 'minecraft', up: null, players: null, max: null },
+          ],
+        },
+      }),
+    );
+
+    const res = await SELF.fetch('https://tyco.sh/', {
+      headers: { 'User-Agent': 'curl/8.5.0', Accept: '*/*' },
+    });
+    expect(await res.text()).toContain('— (2 unknown)');
+  });
+
+  it('prints one dash, not two, when the BMC said nothing', async () => {
+    await push(
+      validSnapshot({
+        rack: { inlet_c: null, draw_w: null, fans_rpm: null, chassis: 'a 2U dual-socket server' },
+      }),
+    );
+
+    const res = await SELF.fetch('https://tyco.sh/', {
+      headers: { 'User-Agent': 'curl/8.5.0', Accept: '*/*' },
+    });
+    expect(await res.text()).not.toContain('—, —');
+  });
+});
