@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>William Wolff</title>
+    <meta
+      name="description"
+      content="Infrastructure, Go, and a rack in Indiana. A page and a small API, fed by real telemetry."
+    />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ctext y='26' font-size='26'%3E%E2%96%A6%3C/text%3E%3C/svg%3E" />
+    <style>
+      :root {
+        color-scheme: light dark;
+
+        --bg: #fbfaf8;
+        --panel: #ffffff;
+        --ink: #1b1a18;
+        --ink-dim: #6a665f;
+        --ink-faint: #9b968d;
+        --rule: #e4e0d8;
+        --accent: #9a5b2c;
+        --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+        --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #121211;
+          --panel: #191918;
+          --ink: #e8e5df;
+          --ink-dim: #9d988e;
+          --ink-faint: #6a655c;
+          --rule: #2a2926;
+          --accent: #d79b62;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: var(--sans);
+        font-size: 16px;
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      main {
+        max-width: 46rem;
+        margin: 0 auto;
+        padding: 4.5rem 1.5rem 6rem;
+      }
+
+      section {
+        margin-top: 3.25rem;
+      }
+
+      h1 {
+        font-family: var(--mono);
+        font-size: 1.6rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 0;
+      }
+
+      h2 {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin: 0 0 1.1rem;
+      }
+
+      a {
+        color: var(--accent);
+        text-decoration-thickness: 1px;
+        text-underline-offset: 2px;
+      }
+
+      .tagline {
+        color: var(--ink-dim);
+        margin: 0.4rem 0 0;
+      }
+
+      .contact {
+        font-family: var(--mono);
+        font-size: 0.85rem;
+        margin: 1rem 0 0;
+        color: var(--ink-dim);
+      }
+
+      .contact a {
+        color: var(--ink-dim);
+      }
+      .contact a:hover {
+        color: var(--accent);
+      }
+
+      /* Live band ------------------------------------------------------- */
+
+      .band {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+        gap: 1px;
+        background: var(--rule);
+        border: 1px solid var(--rule);
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .stat {
+        background: var(--panel);
+        padding: 0.85rem 0.9rem;
+      }
+
+      .stat .v {
+        font-family: var(--mono);
+        font-size: 1.35rem;
+        line-height: 1.2;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .stat .k {
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--ink-faint);
+        margin-top: 0.2rem;
+      }
+
+      .band-note {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--ink-faint);
+        margin-top: 0.6rem;
+      }
+
+      /* Capabilities ---------------------------------------------------- */
+
+      .caps {
+        margin: 0;
+        font-size: 0.95rem;
+      }
+
+      .caps > div {
+        display: flex;
+        gap: 1rem;
+        padding: 0.4rem 0;
+        border-top: 1px solid var(--rule);
+      }
+
+      .caps > div:first-child {
+        border-top: 0;
+      }
+
+      .caps dt {
+        font-family: var(--mono);
+        font-size: 0.8rem;
+        color: var(--accent);
+        flex: 0 0 5.5rem;
+        padding-top: 0.15rem;
+      }
+
+      .caps dd {
+        margin: 0;
+        color: var(--ink-dim);
+      }
+
+      /* Work ------------------------------------------------------------ */
+
+      .work > li {
+        list-style: none;
+        padding: 0.9rem 0;
+        border-top: 1px solid var(--rule);
+      }
+
+      .work {
+        margin: 0;
+        padding: 0;
+      }
+
+      .work > li:first-child {
+        border-top: 0;
+      }
+
+      .work h3 {
+        font-family: var(--mono);
+        font-size: 0.95rem;
+        margin: 0 0 0.15rem;
+        font-weight: 600;
+      }
+
+      .work p {
+        margin: 0;
+        color: var(--ink-dim);
+        font-size: 0.95rem;
+      }
+
+      /* API ------------------------------------------------------------- */
+
+      .api > li {
+        list-style: none;
+        border-top: 1px solid var(--rule);
+        padding: 0.75rem 0;
+      }
+
+      .api {
+        margin: 0;
+        padding: 0;
+      }
+
+      .api > li:first-child {
+        border-top: 0;
+      }
+
+      .api-head {
+        display: flex;
+        align-items: baseline;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      .api button {
+        font: inherit;
+        font-family: var(--mono);
+        font-size: 0.8rem;
+        background: none;
+        border: 1px solid var(--rule);
+        border-radius: 3px;
+        color: var(--ink);
+        padding: 0.1rem 0.5rem;
+        cursor: pointer;
+      }
+
+      .api button:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+
+      .api code {
+        font-family: var(--mono);
+        font-size: 0.82rem;
+      }
+
+      .api .desc {
+        color: var(--ink-faint);
+        font-size: 0.85rem;
+      }
+
+      .api pre {
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        border-radius: 3px;
+        padding: 0.6rem 0.7rem;
+        margin: 0.55rem 0 0;
+        overflow-x: auto;
+        color: var(--ink-dim);
+      }
+
+      /* Elsewhere / footer ---------------------------------------------- */
+
+      .elsewhere {
+        font-size: 0.9rem;
+        color: var(--ink-dim);
+      }
+
+      .elsewhere div {
+        padding: 0.25rem 0;
+      }
+
+      footer {
+        margin-top: 3.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--rule);
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--ink-faint);
+      }
+    </style>
+  </head>
+
+  <body>
+    <main>
+      <header>
+        <h1>William Wolff</h1>
+        <p class="tagline">Infrastructure · Go · a rack in Indiana</p>
+        <p class="contact">
+          <a href="mailto:guardian@runegateway.com">guardian@runegateway.com</a> ·
+          <a href="https://github.com/CaptainVirgil" rel="me">github.com/CaptainVirgil</a>
+        </p>
+      </header>
+
+      <section id="live">
+        <h2>Right now</h2>
+        <div class="band" id="band">
+          <div class="stat"><div class="v">—</div><div class="k">availability</div></div>
+          <div class="stat"><div class="v">—</div><div class="k">nodes</div></div>
+          <div class="stat"><div class="v">—</div><div class="k">rack °C</div></div>
+          <div class="stat"><div class="v">—</div><div class="k">draw W</div></div>
+          <div class="stat"><div class="v">—</div><div class="k">servers up</div></div>
+        </div>
+        <p class="band-note" id="band-note">no snapshot yet — the pipeline isn’t built</p>
+      </section>
+
+      <section id="running">
+        <h2>What’s running</h2>
+        <dl class="caps" id="caps"></dl>
+      </section>
+
+      <section id="work">
+        <h2>Selected work</h2>
+        <ul class="work" id="work-list"></ul>
+      </section>
+
+      <section id="api">
+        <h2>The API</h2>
+        <ul class="api" id="api-list">
+          <li><span class="desc">loading…</span></li>
+        </ul>
+      </section>
+
+      <section id="elsewhere">
+        <h2>Elsewhere</h2>
+        <div class="elsewhere" id="elsewhere-list"></div>
+      </section>
+
+      <footer>
+        <span id="foot">curl tyco.sh — this page, for terminals</span>
+      </footer>
+    </main>
+
+    <script type="module">
+      const CAPABILITIES = [
+        ['compute', 'six-node HA Kubernetes · five-node ARM cluster · a 2U hypervisor'],
+        ['network', 'ten routed segments · BSD firewall · controller-managed wireless'],
+        ['identity', 'single sign-on across every service · a self-hosted secret vault'],
+        ['storage', 'replicated block storage · snapshotting filesystems · offsite copies'],
+        ['delivery', 'GitOps reconciliation · a self-hosted forge · daemonless image builds'],
+        ['games', 'five servers, systemd-owned, one panel I wrote'],
+      ];
+
+      const WORK = [
+        [
+          'roost',
+          'Five game servers, one box, systemd owns every process. The panel observes and never guesses where a dbus signal already exists.',
+        ],
+        [
+          'wake',
+          'The venue serves no history and caps fills per wallet, so the recorded dataset is irreplaceable and downtime is permanent loss.',
+        ],
+        [
+          'tyco-home',
+          'The backend sends raw state; the browser derives every rendered word, so a rule change is a page edit, not a redeploy.',
+        ],
+        [
+          'KenshiCoop',
+          'Two-player co-op grafted into a game never built for it, in C++03 against a 2010 toolchain, driven by two humans’ session logs.',
+        ],
+      ];
+
+      const ELSEWHERE = [
+        ['https://runegateway.com', 'runegateway.com', 'a CSS animation and nothing else'],
+        ['https://makeubutr.com', 'makeubutr.com', 'a reference to an old gamertag'],
+      ];
+
+      const caps = document.getElementById('caps');
+      for (const [group, detail] of CAPABILITIES) {
+        const row = document.createElement('div');
+        const dt = document.createElement('dt');
+        dt.textContent = group;
+        const dd = document.createElement('dd');
+        dd.textContent = detail;
+        row.append(dt, dd);
+        caps.append(row);
+      }
+
+      const workList = document.getElementById('work-list');
+      for (const [name, line] of WORK) {
+        const li = document.createElement('li');
+        const h3 = document.createElement('h3');
+        h3.textContent = name;
+        const p = document.createElement('p');
+        p.textContent = line;
+        li.append(h3, p);
+        workList.append(li);
+      }
+
+      const elsewhere = document.getElementById('elsewhere-list');
+      for (const [href, label, what] of ELSEWHERE) {
+        const div = document.createElement('div');
+        const a = document.createElement('a');
+        a.href = href;
+        a.textContent = label;
+        div.append(a, document.createTextNode(` — ${what}`));
+        elsewhere.append(div);
+      }
+
+      // The page eats its own API. That is the demonstration; a screenshot of
+      // a response would not be.
+      const apiList = document.getElementById('api-list');
+
+      async function loadEndpoints() {
+        let endpoints;
+        try {
+          const res = await fetch('/api/endpoints');
+          ({ endpoints } = await res.json());
+        } catch {
+          apiList.replaceChildren(row(null));
+          return;
+        }
+        apiList.replaceChildren(...endpoints.map((e) => row(e)));
+      }
+
+      function row(e) {
+        const li = document.createElement('li');
+        if (!e) {
+          const span = document.createElement('span');
+          span.className = 'desc';
+          span.textContent = 'the API did not answer';
+          li.append(span);
+          return li;
+        }
+
+        const head = document.createElement('div');
+        head.className = 'api-head';
+
+        const code = document.createElement('code');
+        code.textContent = `curl tyco.sh${e.path}`;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = 'run';
+
+        const desc = document.createElement('span');
+        desc.className = 'desc';
+        desc.textContent = e.describe;
+
+        head.append(code, btn, desc);
+        li.append(head);
+
+        const out = document.createElement('pre');
+        out.hidden = true;
+        li.append(out);
+
+        btn.addEventListener('click', async () => {
+          out.hidden = false;
+          out.textContent = '…';
+          try {
+            const res = await fetch(e.path, { headers: { Accept: 'application/json' } });
+            const body = await res.text();
+            out.textContent = `HTTP ${res.status}\n\n${body.trimEnd()}`;
+          } catch (err) {
+            out.textContent = String(err);
+          }
+        });
+
+        return li;
+      }
+
+      loadEndpoints();
+    </script>
+  </body>
+</html>

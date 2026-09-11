@@ -1,0 +1,128 @@
+import { SELF } from 'cloudflare:test';
+import { describe, expect, it } from 'vitest';
+
+const CURL = { 'User-Agent': 'curl/8.5.0', Accept: '*/*' };
+const BROWSER = {
+  'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) Chrome/140.0',
+  Accept: 'text/html,application/xhtml+xml,*/*;q=0.8',
+};
+
+describe('/', () => {
+  it('serves plain text to a terminal', async () => {
+    const res = await SELF.fetch('https://tyco.sh/', { headers: CURL });
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toContain('text/plain');
+    expect(await res.text()).toContain('curl tyco.sh/api/hire');
+  });
+
+  it('serves the page to a browser', async () => {
+    const res = await SELF.fetch('https://tyco.sh/', { headers: BROWSER });
+    expect(res.status).toBe(200);
+    expect(res.headers.get('Content-Type')).toContain('text/html');
+    expect(await res.text()).toContain('<title>William Wolff</title>');
+  });
+});
+
+describe('/api/endpoints', () => {
+  it('lists every route, and nothing it lists 404s', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/endpoints');
+    const { endpoints } = await res.json<{
+      endpoints: { path: string; describe: string; live: boolean }[];
+    }>();
+
+    expect(endpoints.length).toBeGreaterThan(0);
+
+    // The index and the router read the same table, so a documented route that
+    // does not resolve would mean the table itself is wrong. /api/it-was-not-dns
+    // is the one legitimate 404 — it is documented precisely because it 404s.
+    for (const e of endpoints) {
+      const probe = await SELF.fetch(`https://tyco.sh${e.path}`);
+      const allowed = e.path === '/api/it-was-not-dns' ? [404] : [200, 302, 418];
+      expect(allowed, `${e.path} returned ${probe.status}`).toContain(probe.status);
+    }
+  });
+});
+
+describe('/api/hire', () => {
+  it('answers with JSON Resume by default', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/hire');
+    expect(res.status).toBe(200);
+    const body = await res.json<{ basics: { name: string }; meta: { version: string } }>();
+    expect(body.basics.name).toBe('William Wolff');
+    expect(body.meta.version).toBeTruthy();
+  });
+
+  it('answers in plain text when asked', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/hire', {
+      headers: { Accept: 'text/plain' },
+    });
+    expect(res.headers.get('Content-Type')).toContain('text/plain');
+    const body = await res.text();
+    expect(body).toContain('William Wolff');
+    // 80 columns, because the thing asking for text is a terminal.
+    for (const line of body.split('\n')) expect(line.length).toBeLessThanOrEqual(80);
+  });
+
+  it('sends a browser to the page rather than a wall of JSON', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/hire', {
+      headers: BROWSER,
+      redirect: 'manual',
+    });
+    expect(res.status).toBe(302);
+    expect(res.headers.get('Location')).toContain('/#work');
+  });
+
+  it('never consults a binding — it must answer when the house is dark', async () => {
+    // A crude but honest check: the handler module imports no binding at all.
+    const src = await import('../src/api/hire');
+    expect(typeof src.hire).toBe('function');
+    const res = await src.hire(
+      new Request('https://tyco.sh/api/hire'),
+      new URL('https://tyco.sh/'),
+    );
+    expect(res.status).toBe(200);
+  });
+});
+
+describe('the jokes', () => {
+  it('is always DNS', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/is-it-dns');
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ dns: true });
+  });
+
+  it('was not DNS, and says so with a 404', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/it-was-not-dns');
+    expect(res.status).toBe(404);
+    expect(await res.json<{ hint: string }>()).toMatchObject({ hint: 'try /api/is-it-dns' });
+  });
+
+  it('is a teapot', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/coffee');
+    expect(res.status).toBe(418);
+    expect(await res.json<{ brewing: boolean }>()).toMatchObject({ brewing: false });
+  });
+});
+
+describe('router', () => {
+  it('answers an unknown /api path in JSON, not the 404 page', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/nope');
+    expect(res.status).toBe(404);
+    expect(res.headers.get('Content-Type')).toContain('application/json');
+  });
+
+  it('ignores a trailing slash', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/is-it-dns/');
+    expect(res.status).toBe(200);
+  });
+
+  it('refuses a POST — there are none', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/hire', { method: 'POST' });
+    expect(res.status).toBe(405);
+  });
+
+  it('stamps the contract on every API response', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/is-it-dns');
+    expect(res.headers.get('X-Tyco-Contract')).toBe('1');
+  });
+});

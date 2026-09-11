@@ -1,0 +1,93 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
+  "basics": {
+    "name": "William Wolff",
+    "label": "Infrastructure engineer",
+    "email": "guardian@runegateway.com",
+    "url": "https://tyco.sh",
+    "summary": "Infrastructure and Go. I run a six-node Kubernetes cluster, a hypervisor, ten routed network segments and five game servers out of a rack in Indiana, and I write the tools that operate them.",
+    "location": {
+      "city": "St John",
+      "region": "Indiana",
+      "countryCode": "US"
+    },
+    "profiles": [
+      {
+        "network": "GitHub",
+        "username": "CaptainVirgil",
+        "url": "https://github.com/CaptainVirgil"
+      }
+    ]
+  },
+
+  "work": [
+    {
+      "name": "TODO — replace before this file is real",
+      "position": "TODO",
+      "startDate": "TODO",
+      "summary": "Placeholder. Every field under `work` is unwritten. The build refuses to produce a PDF while any TODO remains (see scripts/build-resume.js), so this cannot ship by accident.",
+      "highlights": []
+    }
+  ],
+
+  "projects": [
+    {
+      "name": "roost",
+      "description": "A game-server control panel for the case the field ignores: N servers on one box. systemd owns every process; roost observes and never guesses where a dbus signal already exists. Five servers live across four config backends and two installers.",
+      "keywords": ["Go", "SQLite", "systemd", "dbus", "bubbletea"],
+      "roles": ["Author"]
+    },
+    {
+      "name": "wake",
+      "description": "A market-data recorder and paper-trading harness. The venue serves no historical positions and caps fills per wallet, so the recorded dataset is irreplaceable and downtime is permanent loss — which is the constraint the whole design answers to.",
+      "keywords": ["TypeScript", "Bun", "SQLite"],
+      "roles": ["Author"]
+    },
+    {
+      "name": "tyco-home",
+      "description": "A live network diagram assembled from metrics, BMC sensors and service probes. The backend sends raw state and counters; the browser derives every rendered word, so a rule change is a page edit with an instant visual check instead of a redeploy.",
+      "keywords": ["Go", "VictoriaMetrics", "Redfish", "Kubernetes"],
+      "roles": ["Author"]
+    },
+    {
+      "name": "tyco.sh",
+      "description": "This site. A page and a small API, served from the edge, fed by a snapshot the network pushes outward — so nothing public ever reaches the house and a dark house degrades to an honest 'no data' rather than a timeout.",
+      "keywords": ["TypeScript", "Cloudflare Workers", "Go"],
+      "url": "https://tyco.sh",
+      "roles": ["Author"]
+    }
+  ],
+
+  "skills": [
+    {
+      "name": "Infrastructure",
+      "keywords": ["Kubernetes", "systemd", "Proxmox", "Linux", "GitOps", "Argo CD"]
+    },
+    {
+      "name": "Languages",
+      "keywords": ["Go", "TypeScript", "Bash", "SQL", "C++"]
+    },
+    {
+      "name": "Operations",
+      "keywords": [
+        "Prometheus / VictoriaMetrics",
+        "Alerting and on-call",
+        "Backup and restore",
+        "Incident review"
+      ]
+    },
+    {
+      "name": "Networking",
+      "keywords": ["OPNsense", "VLAN segmentation", "Firewall policy", "DNS", "WireGuard"]
+    }
+  ],
+
+  "education": [],
+
+  "meta": {
+    "version": "0.0.0-placeholder",
+    "canonical": "https://tyco.sh/api/hire",
+    "note": "this endpoint does not want anything from you",
+    "lastModified": "2026-09-11"
+  }
+}

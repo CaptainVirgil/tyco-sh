@@ -1,0 +1,26 @@
+{
+  "name": "tyco-sh",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.15.0",
+    "npm": ">=10.9.0"
+  },
+  "packageManager": "npm@10.9.4",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "resume": "node scripts/build-resume.js",
+    "test": "vitest run",
+    "check": "tsc --noEmit && prettier --check \"{src,test,scripts,data}/**/*.{ts,js,json}\"",
+    "format": "prettier --write \"{src,test,scripts,data}/**/*.{ts,js,json}\""
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "@cloudflare/workers-types": "^5.20260911.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.131.0"
+  }
+}
