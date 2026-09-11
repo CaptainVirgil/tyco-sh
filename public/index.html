@@ -603,8 +603,8 @@
       // The live band. Absent numbers render as an em-dash, never as zero —
       // zero watts is a claim about the rack, a dash is a claim about us.
       const BAND = [
-        // availability needs a rolling history the edge does not keep yet (M4).
-        ['availability', () => null],
+        // Filled from /api/uptime, which the edge measures itself — see loadBand.
+        ['availability', (d) => d.availability],
         ['nodes', (d) => d.cluster.nodes],
         ['rack °C', (d) => d.rack.inlet_c],
         ['draw W', (d) => d.rack.draw_w],
@@ -624,14 +624,26 @@
         const band = document.getElementById('band');
         const note = document.getElementById('band-note');
 
-        let d;
+        let d, up;
         try {
-          const res = await fetch('/api/snapshot');
-          d = await res.json();
+          const [snapRes, upRes] = await Promise.all([
+            fetch('/api/snapshot'),
+            fetch('/api/uptime'),
+          ]);
+          d = await snapRes.json();
+          up = await upRes.json();
         } catch {
           note.textContent = 'could not reach the API';
           return;
         }
+
+        // Availability comes from a different endpoint because the edge measures
+        // it rather than the house reporting it. Rendered as a percentage, and
+        // still a dash before the first push is recorded.
+        d.availability =
+          up && typeof up.availability === 'number'
+            ? `${(up.availability * 100).toFixed(up.availability === 1 ? 0 : 2)}%`
+            : null;
 
         band.replaceChildren(
           ...BAND.map(([label, pick]) => {
@@ -654,12 +666,19 @@
           }),
         );
 
+        const window =
+          up && up.window_days > 0
+            ? ` · availability over ${up.window_days} day${up.window_days === 1 ? '' : 's'}`
+            : up && up.availability !== null
+              ? ' · availability measured since today'
+              : '';
+
         if (d.note) {
           note.textContent = d.note;
         } else if (d.stale) {
           note.textContent = `these numbers are ${Math.round((d.age_s ?? 0) / 60)} minutes old`;
         } else {
-          note.textContent = `as of ${new Date(d.as_of).toLocaleTimeString()}`;
+          note.textContent = `as of ${new Date(d.as_of).toLocaleTimeString()}${window}`;
         }
       }
 
