@@ -87,7 +87,7 @@ export const ROUTES: Route[] = [
   },
   {
     path: '/api/uptime',
-    describe: 'availability measured from outside, and how much history stands behind it',
+    describe: 'availability, measured from outside',
     live: true,
     handler: uptime,
   },

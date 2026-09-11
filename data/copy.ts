@@ -40,7 +40,7 @@ export const BIO: readonly string[] = [
   'Full-time dad and husband first; everything on this page happens after bedtime.',
   'Been taking computers apart since I was nine and never really stopped.',
   'Plays hockey.',
-  'Favourite show is The Expanse, which is where this domain got its name.',
+  'Favorite show is The Expanse, which is where this domain got its name.',
 ];
 
 /** Lead with the constraint. Feature lists are forgettable; constraints are not. */
