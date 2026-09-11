@@ -19,7 +19,7 @@ describe('/', () => {
     const res = await SELF.fetch('https://tyco.sh/', { headers: BROWSER });
     expect(res.status).toBe(200);
     expect(res.headers.get('Content-Type')).toContain('text/html');
-    expect(await res.text()).toContain('<title>William Wolff</title>');
+    expect(await res.text()).toContain('<title>William Virgil Wolff</title>');
   });
 });
 
@@ -48,7 +48,7 @@ describe('/api/hire', () => {
     const res = await SELF.fetch('https://tyco.sh/api/hire');
     expect(res.status).toBe(200);
     const body = await res.json<{ basics: { name: string }; meta: { version: string } }>();
-    expect(body.basics.name).toBe('William Wolff');
+    expect(body.basics.name).toBe('William Virgil Wolff');
     expect(body.meta.version).toBeTruthy();
   });
 
@@ -58,7 +58,7 @@ describe('/api/hire', () => {
     });
     expect(res.headers.get('Content-Type')).toContain('text/plain');
     const body = await res.text();
-    expect(body).toContain('William Wolff');
+    expect(body).toContain('William Virgil Wolff');
     // 80 columns, because the thing asking for text is a terminal.
     for (const line of body.split('\n')) expect(line.length).toBeLessThanOrEqual(80);
   });

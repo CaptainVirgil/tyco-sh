@@ -7,9 +7,9 @@
  */
 
 export const IDENTITY = {
-  name: 'William Wolff',
+  name: 'William Virgil Wolff',
   tagline: 'IT director · systems engineer · a rack in Indiana',
-  email: 'guardian@runegateway.com',
+  email: 'virgil@tyco.sh',
   github: 'https://github.com/CaptainVirgil',
   linkedin: 'https://www.linkedin.com/in/captainvirgil/',
 } as const;

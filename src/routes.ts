@@ -3,6 +3,7 @@ import { blame, excuse, oncall, severity } from './api/baked';
 import { hire } from './api/hire';
 import { coffee, isItDns, itWasNotDns } from './api/jokes';
 import { snapshot } from './api/live';
+import { games, pz, rack } from './api/readings';
 import { json } from './respond';
 
 /**
@@ -66,10 +67,28 @@ export const ROUTES: Route[] = [
     handler: severity,
   },
   {
+    path: '/api/games',
+    describe: 'every game server, with a denominator that cannot be misread',
+    live: true,
+    handler: games,
+  },
+  {
+    path: '/api/pz',
+    describe: 'project zomboid: up, and who is on it',
+    live: true,
+    handler: pz,
+  },
+  {
     path: '/api/snapshot',
     describe: 'every live number at once',
     live: true,
     handler: snapshot,
+  },
+  {
+    path: '/api/rack',
+    describe: 'inlet temperature, draw and fan speeds, off the BMC',
+    live: true,
+    handler: rack,
   },
 ];
 

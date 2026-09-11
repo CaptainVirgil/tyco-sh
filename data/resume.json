@@ -1,9 +1,9 @@
 {
   "$schema": "https://raw.githubusercontent.com/jsonresume/resume-schema/v1.0.0/schema.json",
   "basics": {
-    "name": "William Wolff",
+    "name": "William Virgil Wolff",
     "label": "IT Director / Systems Engineer",
-    "email": "guardian@runegateway.com",
+    "email": "virgil@tyco.sh",
     "url": "https://tyco.sh",
     "summary": "Lifelong builder and fixer. Soldering boards as a kid grew into rebuilding engines, pulling cable, and architecting enterprise IT environments. A decade across networking, servers, cloud, identity, security, and software taught me that no problem belongs to someone else: terminate the cable, write the script, design the system, mentor the junior, document the result. Owner end-to-end.",
     "location": {
@@ -29,7 +29,6 @@
       }
     ]
   },
-
   "work": [
     {
       "name": "Grid-Line Transportation, Inc.",
@@ -125,15 +124,28 @@
       ]
     }
   ],
-
   "certificates": [
-    { "name": "CompTIA A+", "issuer": "CompTIA" },
-    { "name": "CompTIA Network+", "issuer": "CompTIA" },
-    { "name": "CompTIA Security+", "issuer": "CompTIA" },
-    { "name": "CompTIA Secure Infrastructure Specialist (CSIS)", "issuer": "CompTIA" },
-    { "name": "CompTIA IT Operations Specialist (CIOS)", "issuer": "CompTIA" }
+    {
+      "name": "CompTIA A+",
+      "issuer": "CompTIA"
+    },
+    {
+      "name": "CompTIA Network+",
+      "issuer": "CompTIA"
+    },
+    {
+      "name": "CompTIA Security+",
+      "issuer": "CompTIA"
+    },
+    {
+      "name": "CompTIA Secure Infrastructure Specialist (CSIS)",
+      "issuer": "CompTIA"
+    },
+    {
+      "name": "CompTIA IT Operations Specialist (CIOS)",
+      "issuer": "CompTIA"
+    }
   ],
-
   "skills": [
     {
       "name": "Network & Routing",
@@ -303,7 +315,6 @@
       ]
     }
   ],
-
   "projects": [
     {
       "name": "roost",
@@ -332,9 +343,7 @@
       "roles": ["Author"]
     }
   ],
-
   "education": [],
-
   "meta": {
     "version": "1.0.0",
     "canonical": "https://tyco.sh/api/hire",

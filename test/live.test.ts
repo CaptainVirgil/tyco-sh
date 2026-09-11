@@ -168,7 +168,9 @@ describe('the baked endpoints survive a dark house', () => {
     await env.SNAPSHOT.delete(KV_KEY);
     const res = await SELF.fetch('https://tyco.sh/api/hire');
     expect(res.status).toBe(200);
-    expect((await res.json<{ basics: { name: string } }>()).basics.name).toBe('William Wolff');
+    expect((await res.json<{ basics: { name: string } }>()).basics.name).toBe(
+      'William Virgil Wolff',
+    );
   });
 });
 
@@ -227,5 +229,77 @@ describe('unknown is not down', () => {
       headers: { 'User-Agent': 'curl/8.5.0', Accept: '*/*' },
     });
     expect(await res.text()).not.toContain('—, —');
+  });
+});
+
+describe('the individual readings agree with the snapshot', () => {
+  it('/api/rack matches what /api/snapshot reports', async () => {
+    await push(validSnapshot());
+    const snap = await (
+      await SELF.fetch('https://tyco.sh/api/snapshot')
+    ).json<{
+      rack: { inlet_c: number; draw_w: number };
+    }>();
+    const rack = await (
+      await SELF.fetch('https://tyco.sh/api/rack')
+    ).json<{
+      inlet_c: number;
+      draw_w: number;
+      stale: boolean;
+    }>();
+    expect(rack.inlet_c).toBe(snap.rack.inlet_c);
+    expect(rack.draw_w).toBe(snap.rack.draw_w);
+    expect(rack.stale).toBe(false);
+  });
+
+  it('/api/rack nulls every reading when the house is dark', async () => {
+    await env.SNAPSHOT.delete(KV_KEY);
+    const r = await (
+      await SELF.fetch('https://tyco.sh/api/rack')
+    ).json<{
+      inlet_c: null;
+      draw_w: null;
+      note: string;
+    }>();
+    expect(r.inlet_c).toBeNull();
+    expect(r.draw_w).toBeNull();
+    expect(r.note).toMatch(/dark/);
+  });
+
+  it('/api/pz reports the one server with a liveness source', async () => {
+    await push(validSnapshot());
+    const r = await (
+      await SELF.fetch('https://tyco.sh/api/pz')
+    ).json<{
+      server: string;
+      up: boolean;
+      players: number;
+    }>();
+    expect(r.server).toBe('project zomboid');
+    expect(r.up).toBe(true);
+    expect(r.players).toBe(3);
+  });
+
+  it('/api/games states surveyable separately from total', async () => {
+    await push(
+      validSnapshot({
+        games: {
+          servers: [
+            { alias: 'project zomboid', up: false, players: null, max: null },
+            { alias: 'valheim', up: null, players: null, max: null },
+            { alias: 'minecraft', up: null, players: null, max: null },
+          ],
+        },
+      }),
+    );
+    const r = await (
+      await SELF.fetch('https://tyco.sh/api/games')
+    ).json<{
+      total: number;
+      surveyable: number;
+      unknown: number;
+      up: number;
+    }>();
+    expect(r).toMatchObject({ total: 3, surveyable: 1, unknown: 2, up: 0 });
   });
 });
