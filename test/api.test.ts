@@ -132,3 +132,26 @@ describe('router', () => {
     expect(res.headers.get('X-Tyco-Contract')).toBe('1');
   });
 });
+
+describe('alias hostnames', () => {
+  it.each(['tycostation.com', 'www.tycostation.com', 'www.tyco.sh'])(
+    '301s %s to the apex',
+    async (host) => {
+      const res = await SELF.fetch(`https://${host}/api/is-it-dns?x=1`, { redirect: 'manual' });
+      expect(res.status).toBe(301);
+      expect(res.headers.get('Location')).toBe('https://tyco.sh/api/is-it-dns?x=1');
+    },
+  );
+
+  it('leaves real subdomains alone — they resolve to their own hosts', async () => {
+    // mail. and vpn. on tycostation.com are live services. If they ever reach
+    // this Worker, redirecting them would break them.
+    const res = await SELF.fetch('https://mail.tycostation.com/', { redirect: 'manual' });
+    expect(res.status).not.toBe(301);
+  });
+
+  it('does not redirect the apex to itself', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/is-it-dns', { redirect: 'manual' });
+    expect(res.status).toBe(200);
+  });
+});

@@ -12,6 +12,7 @@
  */
 
 import { readFile, writeFile } from 'node:fs/promises';
+import { renderPdf } from './render-pdf.js';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -30,6 +31,9 @@ if (todos.length) {
 
 await writeFile(join(root, 'public/resume.txt'), plaintext(resume), 'utf8');
 console.log(`wrote public/resume.txt (version ${resume.meta.version})`);
+
+await renderPdf(resume, join(root, 'public/resume.pdf'));
+console.log(`wrote public/resume.pdf (version ${resume.meta.version})`);
 
 /** Walks the whole document so a TODO cannot hide in a nested array. */
 function findTodos(node, path = '') {
