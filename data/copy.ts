@@ -70,7 +70,7 @@ export const WORK: ReadonlyArray<{ name: string; line: string }> = [
  */
 export const ELSEWHERE: ReadonlyArray<{ host: string; what: string }> = [
   { host: 'stacksavr.com', what: 'my MSP — flat-rate IT for small business' },
-  { host: 'runegateway.com', what: 'a CSS animation and nothing else' },
+  { host: 'runegateway.com', what: 'a portal to another dimension of course' },
   { host: 'makeubutr.com', what: 'a reference to an old gamertag' },
 ];
 
