@@ -48,6 +48,24 @@ export interface Uptime {
   outages: number;
   measured_by: string;
   since: string | null;
+  /** One entry per UTC day, oldest first. WINDOW_DAYS long, always. */
+  days: Day[];
+}
+
+/**
+ * One day in the strip.
+ *
+ * `availability` is null for a day we were not yet watching — which is a
+ * different fact from a day with no outages, and the strip draws it
+ * differently. Before `since` there is no evidence either way, and a run of
+ * confident green stretching back before the edge existed would be a lie.
+ */
+export interface Day {
+  /** YYYY-MM-DD, UTC. */
+  date: string;
+  availability: number | null;
+  /** Seconds of outage attributed to this day. */
+  down_s: number;
 }
 
 /**
@@ -129,6 +147,7 @@ export function summarize(a: Avail | null, nowMs: number): Uptime {
       outages: 0,
       measured_by,
       since: null,
+      days: dailySeries(null, nowMs, []),
     };
   }
 
@@ -144,6 +163,7 @@ export function summarize(a: Avail | null, nowMs: number): Uptime {
       outages: 0,
       measured_by,
       since: a.since,
+      days: dailySeries(null, nowMs, []),
     };
   }
 
@@ -174,7 +194,56 @@ export function summarize(a: Avail | null, nowMs: number): Uptime {
     outages,
     measured_by,
     since: a.since,
+    // The same gap list the headline number used, including any open one.
+    days: dailySeries(a, nowMs, gaps),
   };
+}
+
+/**
+ * Availability per UTC day across the window.
+ *
+ * Gaps are clipped to each day's bounds rather than attributed to the day they
+ * started, so an outage spanning midnight shows on both days in the proportion
+ * it actually occupied. A day is `null` until the edge was watching: the strip
+ * renders those as unobserved rather than as perfect.
+ */
+export function dailySeries(a: Avail | null, nowMs: number, gaps: Gap[]): Day[] {
+  const out: Day[] = [];
+  const dayMs = 86400_000;
+
+  // Midnight UTC that starts today, then walk back WINDOW_DAYS - 1.
+  const todayStart = Math.floor(nowMs / dayMs) * dayMs;
+  const since = a ? Date.parse(a.since) : Number.POSITIVE_INFINITY;
+
+  for (let i = WINDOW_DAYS - 1; i >= 0; i--) {
+    const start = todayStart - i * dayMs;
+    const end = Math.min(start + dayMs, nowMs);
+    const date = new Date(start).toISOString().slice(0, 10);
+
+    // Only the part of the day we were actually watching counts as observed.
+    const obsStart = Math.max(start, since);
+    const observed = end - obsStart;
+
+    if (!a || observed <= 0) {
+      out.push({ date, availability: null, down_s: 0 });
+      continue;
+    }
+
+    let downMs = 0;
+    for (const g of gaps) {
+      const from = Math.max(Date.parse(g.from), obsStart);
+      const to = Math.min(Date.parse(g.to), end);
+      if (to > from) downMs += to - from;
+    }
+
+    out.push({
+      date,
+      availability: Number(Math.max(0, Math.min(1, 1 - downMs / observed)).toFixed(5)),
+      down_s: Math.round(downMs / 1000),
+    });
+  }
+
+  return out;
 }
 
 export async function readAvail(env: Env): Promise<Avail | null> {

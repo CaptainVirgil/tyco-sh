@@ -20,6 +20,9 @@
         --ink-faint: #9b968d;
         --rule: #e4e0d8;
         --accent: #9a5b2c;
+        --ok: #5c8a5c;
+        --warn: #c99a3f;
+        --bad: #b4553f;
         --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
         --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
       }
@@ -33,6 +36,9 @@
           --ink-faint: #6a655c;
           --rule: #2a2926;
           --accent: #d79b62;
+          --ok: #6f9f6f;
+          --warn: #d4a854;
+          --bad: #c56a52;
         }
       }
 
@@ -336,6 +342,165 @@
         color: var(--accent);
       }
 
+
+      /* Uptime strip ---------------------------------------------------- */
+
+      .strip {
+        display: flex;
+        gap: 2px;
+        margin-top: 0.75rem;
+        height: 1.75rem;
+        align-items: stretch;
+      }
+
+      .strip .d {
+        flex: 1 1 0;
+        min-width: 2px;
+        border-radius: 1px;
+        /* Unobserved is the default: days before the edge existed are not
+           green, because we have no evidence either way. */
+        background: var(--rule);
+      }
+
+      .strip .d.ok {
+        background: var(--ok);
+      }
+      .strip .d.part {
+        background: var(--warn);
+      }
+      .strip .d.bad {
+        background: var(--bad);
+      }
+
+      .strip .d:hover {
+        outline: 1px solid var(--ink-dim);
+        outline-offset: 1px;
+      }
+
+      .strip-axis {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        color: var(--ink-faint);
+        margin-top: 0.3rem;
+      }
+
+      /* Heartbeat ------------------------------------------------------- */
+
+      .beat {
+        display: inline-block;
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: var(--ink-faint);
+        margin-right: 0.45rem;
+        vertical-align: 0.05rem;
+      }
+
+      .beat.live {
+        background: var(--ok);
+        animation: pulse 2.4s ease-in-out infinite;
+      }
+      .beat.aging {
+        background: var(--warn);
+      }
+      .beat.dark {
+        background: var(--bad);
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.35; }
+      }
+
+      .stat .v.changed {
+        animation: flash 1.2s ease-out;
+      }
+
+      @keyframes flash {
+        0% { color: var(--accent); }
+        100% { color: inherit; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .beat.live { animation: none; }
+        .stat .v.changed { animation: none; }
+      }
+
+      /* Timeline -------------------------------------------------------- */
+
+      .tl {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .tl li {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.15rem;
+        padding: 0.4rem 0;
+      }
+
+      .tl .row {
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+
+      .tl .role {
+        font-family: var(--mono);
+        font-size: 0.85rem;
+        color: var(--ink);
+      }
+
+      .tl .org {
+        font-size: 0.85rem;
+        color: var(--ink-dim);
+      }
+
+      .tl .when {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--ink-faint);
+        margin-left: auto;
+        white-space: nowrap;
+      }
+
+      .tl .bar {
+        height: 5px;
+        border-radius: 3px;
+        background: var(--rule);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .tl .bar span {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background: var(--accent);
+        border-radius: 3px;
+        opacity: 0.75;
+      }
+
+      .tl li.current .bar span {
+        opacity: 1;
+      }
+
+      .tl-axis {
+        display: flex;
+        justify-content: space-between;
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        color: var(--ink-faint);
+        margin-top: 0.4rem;
+        border-top: 1px solid var(--rule);
+        padding-top: 0.3rem;
+      }
+
       /* Elsewhere / footer ---------------------------------------------- */
 
       .elsewhere {
@@ -379,7 +544,10 @@
           <div class="stat"><div class="v">—</div><div class="k">draw W</div></div>
           <div class="stat"><div class="v">—</div><div class="k">game servers</div></div>
         </div>
-        <p class="band-note" id="band-note">no snapshot yet — the pipeline isn’t built</p>
+        <p class="band-note" id="band-note"><span class="beat" id="beat"></span>connecting…</p>
+
+        <div class="strip" id="strip" role="img" aria-label="Daily availability, last 90 days"></div>
+        <div class="strip-axis"><span id="strip-from">90 days ago</span><span id="strip-to">today</span></div>
       </section>
 
       <section id="running">
@@ -394,10 +562,9 @@
 
       <section id="experience">
         <h2>Experience</h2>
-        <p class="tagline" style="font-size: 0.95rem">
-          A decade across networking, servers, cloud, identity and security — most recently
-          directing IT at a transportation company, before that engineering client environments
-          across hospitality, biopharma and public safety.
+        <ul class="tl" id="tl"></ul>
+        <div class="tl-axis" id="tl-axis"></div>
+        <p class="tagline" style="font-size: 0.9rem; margin-top: 1.1rem">
           <a href="/api/hire">The full record is the API</a>, or
           <a href="/resume.txt">read it as plain text</a>.
         </p>
@@ -462,7 +629,7 @@
       const BIO = [
         'Full-time dad and husband first; everything on this page happens after bedtime.',
         'Been taking computers apart since I was nine and never really stopped.',
-        'Plays hockey.',
+        'Plays hockey — #44 for the Puck Bunnies at Johnny’s IceHouse, and the Underachievers in MWIC.',
         'Favorite show is The Expanse, which is where this domain got its name.',
       ];
 
@@ -613,6 +780,85 @@
 
       // "0" with four unknowns reads as four servers down. The denominator is
       // what can actually be surveyed; a server nobody can reach is not down.
+      // Remember the last rendered value per tile so a change can be flashed.
+      const lastSeen = new Map();
+
+      function renderStrip(up) {
+        const strip = document.getElementById('strip');
+        const days = (up && up.days) || [];
+        if (!days.length) return;
+
+        strip.replaceChildren(
+          ...days.map((day) => {
+            const cell = document.createElement('div');
+            // Unobserved stays the default grey. A day we were not watching is
+            // not a day that was fine.
+            let cls = 'd';
+            let label = `${day.date}: not yet watching`;
+            if (day.availability !== null) {
+              cls += day.availability >= 0.9999 ? ' ok' : day.availability >= 0.95 ? ' part' : ' bad';
+              const mins = Math.round(day.down_s / 60);
+              label =
+                day.down_s === 0
+                  ? `${day.date}: no outage`
+                  : `${day.date}: ${mins} min down (${(day.availability * 100).toFixed(2)}%)`;
+            }
+            cell.className = cls;
+            cell.title = label;
+            return cell;
+          }),
+        );
+
+        const first = days.find((x) => x.availability !== null);
+        document.getElementById('strip-from').textContent = first
+          ? first.date
+          : `${days.length} days ago`;
+        document.getElementById('strip-to').textContent = days[days.length - 1].date;
+      }
+
+      // Count toward a new number rather than snapping, but only for plain
+      // integers — anything with a slash or a unit is swapped outright.
+      function setValue(el, key, next) {
+        const prev = lastSeen.get(key);
+        lastSeen.set(key, next);
+        if (prev === next) {
+          el.textContent = next;
+          return;
+        }
+        if (prev !== undefined) {
+          el.classList.remove('changed');
+          void el.offsetWidth;
+          el.classList.add('changed');
+        }
+
+        const a = Number(prev);
+        const b = Number(next);
+        const animate =
+          prev !== undefined &&
+          Number.isFinite(a) &&
+          Number.isFinite(b) &&
+          String(next) === String(b) &&
+          Math.abs(b - a) > 0 &&
+          !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+        if (!animate) {
+          el.textContent = next;
+          return;
+        }
+
+        const dur = 500;
+        const t0 = performance.now();
+        const dp = (String(next).split('.')[1] || '').length;
+        const step = (t) => {
+          const k = Math.min(1, (t - t0) / dur);
+          const eased = 1 - Math.pow(1 - k, 3);
+          el.textContent = (a + (b - a) * eased).toFixed(dp);
+          if (k < 1) requestAnimationFrame(step);
+          else el.textContent = next;
+        };
+        requestAnimationFrame(step);
+      }
+
       function surveyedUp(servers) {
         const surveyable = servers.filter((g) => g.up !== null);
         if (!surveyable.length) return null;
@@ -633,7 +879,7 @@
           d = await snapRes.json();
           up = await upRes.json();
         } catch {
-          note.textContent = 'could not reach the API';
+          note.replaceChildren(document.createTextNode('could not reach the API'));
           return;
         }
 
@@ -657,7 +903,7 @@
             cell.className = 'stat';
             const val = document.createElement('div');
             val.className = 'v';
-            val.textContent = v === null || v === undefined ? '—' : String(v);
+            setValue(val, label, v === null || v === undefined ? '—' : String(v));
             const key = document.createElement('div');
             key.className = 'k';
             key.textContent = label;
@@ -673,15 +919,121 @@
               ? ' · availability measured since today'
               : '';
 
+        renderStrip(up);
+
+        // A dot that ages. Live while a push is recent, amber as it drifts past
+        // the cadence, red once the edge has nothing left to serve.
+        const beat = document.createElement('span');
+        beat.className =
+          'beat ' + (d.note ? 'dark' : d.stale ? 'aging' : 'live');
+        note.replaceChildren(beat);
+        const say = (t) => note.append(document.createTextNode(t));
+
+        // Liveness in the tab title, for whoever leaves it open in a pin.
+        const bits = [];
+        if (d.cluster.nodes != null) bits.push(d.cluster.nodes + ' nodes');
+        if (d.rack.inlet_c != null) bits.push(d.rack.inlet_c + '°C');
+        if (d.rack.draw_w != null) bits.push(d.rack.draw_w + 'W');
+        document.title = bits.length
+          ? bits.join(' · ') + ' — William Virgil Wolff'
+          : 'William Virgil Wolff';
+
         if (d.note) {
-          note.textContent = d.note;
+          say(d.note);
         } else if (d.stale) {
-          note.textContent = `these numbers are ${Math.round((d.age_s ?? 0) / 60)} minutes old`;
+          say(`these numbers are ${Math.round((d.age_s ?? 0) / 60)} minutes old`);
         } else {
-          note.textContent = `as of ${new Date(d.as_of).toLocaleTimeString()}${window}`;
+          say(`as of ${new Date(d.as_of).toLocaleTimeString()}${window}`);
         }
       }
 
+      // Experience as a strip, drawn from the same JSON the résumé endpoint
+      // serves — so it cannot disagree with /api/hire or the PDF.
+      async function loadTimeline() {
+        const list = document.getElementById('tl');
+        const axis = document.getElementById('tl-axis');
+
+        let work;
+        try {
+          ({ work } = await (await fetch('/api/hire')).json());
+        } catch {
+          return;
+        }
+        if (!work || !work.length) return;
+
+        const parse = (d) => {
+          if (!d) return null;
+          const [y, m] = String(d).split('-');
+          return Date.UTC(Number(y), m ? Number(m) - 1 : 0, 1);
+        };
+        const now = Date.now();
+        const rows = work
+          .map((w) => ({
+            role: w.position,
+            org: w.name,
+            from: parse(w.startDate),
+            to: w.endDate ? parse(w.endDate) : now,
+            current: !w.endDate,
+          }))
+          .filter((r) => r.from !== null)
+          .sort((a, b) => b.from - a.from);
+
+        const min = Math.min(...rows.map((r) => r.from));
+        const max = Math.max(...rows.map((r) => r.to));
+        const span = max - min || 1;
+        const pct = (t) => ((t - min) / span) * 100;
+
+        const fmt = (ms, open) =>
+          open
+            ? 'present'
+            : new Date(ms).toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                timeZone: 'UTC',
+              });
+
+        list.replaceChildren(
+          ...rows.map((r) => {
+            const li = document.createElement('li');
+            if (r.current) li.className = 'current';
+
+            const row = document.createElement('div');
+            row.className = 'row';
+            const role = document.createElement('span');
+            role.className = 'role';
+            role.textContent = r.role;
+            const org = document.createElement('span');
+            org.className = 'org';
+            org.textContent = r.org;
+            const when = document.createElement('span');
+            when.className = 'when';
+            when.textContent = `${fmt(r.from)} – ${fmt(r.to, r.current)}`;
+            row.append(role, org, when);
+
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            const fill = document.createElement('span');
+            fill.style.left = pct(r.from) + '%';
+            // Floor the width so a short role is still a visible mark.
+            fill.style.width = Math.max(1.5, pct(r.to) - pct(r.from)) + '%';
+            bar.append(fill);
+
+            li.append(row, bar);
+            return li;
+          }),
+        );
+
+        const y0 = new Date(min).getUTCFullYear();
+        const y1 = new Date(max).getUTCFullYear();
+        axis.replaceChildren();
+        for (const y of [y0, Math.round((y0 + y1) / 2), y1]) {
+          const s = document.createElement('span');
+          s.textContent = String(y);
+          axis.append(s);
+        }
+      }
+
+      loadTimeline();
       loadBand();
       setInterval(loadBand, 60000);
     </script>

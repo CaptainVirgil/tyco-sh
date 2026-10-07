@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { GAP_S, observe, summarize, WINDOW_DAYS, type Avail } from '../src/availability';
+import {
+  dailySeries,
+  GAP_S,
+  observe,
+  summarize,
+  WINDOW_DAYS,
+  type Avail,
+} from '../src/availability';
 
 const T0 = Date.parse('2026-09-01T00:00:00Z');
 const iso = (ms: number) => new Date(ms).toISOString();
@@ -113,5 +120,62 @@ describe('summarize', () => {
     const got = summarize(a, T0 + 86400_000);
     // Only the hour after `since` counts, not the ten before it.
     expect(got.availability).toBeCloseTo(1 - 60 / (24 * 60), 3);
+  });
+});
+
+describe('dailySeries', () => {
+  const day = 86400_000;
+  // Fix "now" to mid-afternoon so a partial final day is exercised.
+  const NOW = Date.parse('2026-09-20T15:00:00Z');
+
+  it('returns exactly the window length, oldest first', () => {
+    const a: Avail = { since: iso(NOW - 5 * day), last_seen: iso(NOW), gaps: [] };
+    const d = dailySeries(a, NOW, a.gaps);
+    expect(d).toHaveLength(WINDOW_DAYS);
+    expect(d[0]!.date < d[d.length - 1]!.date).toBe(true);
+    expect(d[d.length - 1]!.date).toBe('2026-09-20');
+  });
+
+  it('marks days before we were watching as null, not as perfect', () => {
+    // The whole point of the strip: a run of confident green stretching back
+    // before the edge existed would be a lie.
+    const a: Avail = { since: iso(NOW - 2 * day), last_seen: iso(NOW), gaps: [] };
+    const d = dailySeries(a, NOW, a.gaps);
+    expect(d[0]!.availability).toBeNull();
+    expect(d[d.length - 1]!.availability).not.toBeNull();
+  });
+
+  it('splits an outage across midnight in proportion', () => {
+    // Two hours either side of midnight: each day loses exactly two hours.
+    const midnight = Date.parse('2026-09-19T00:00:00Z');
+    const a: Avail = {
+      since: iso(NOW - 10 * day),
+      last_seen: iso(NOW),
+      gaps: [{ from: iso(midnight - 2 * 3600_000), to: iso(midnight + 2 * 3600_000) }],
+    };
+    const d = dailySeries(a, NOW, a.gaps);
+    const before = d.find((x) => x.date === '2026-09-18')!;
+    const after = d.find((x) => x.date === '2026-09-19')!;
+    expect(before.down_s).toBe(2 * 3600);
+    expect(after.down_s).toBe(2 * 3600);
+    expect(before.availability).toBeCloseTo(1 - 2 / 24, 4);
+  });
+
+  it('measures the final day against elapsed time, not a full 24h', () => {
+    // 15:00 in, one hour down = 1/15 of the observed day, not 1/24.
+    const a: Avail = {
+      since: iso(NOW - 10 * day),
+      last_seen: iso(NOW),
+      gaps: [{ from: iso(NOW - 3600_000), to: iso(NOW) }],
+    };
+    const d = dailySeries(a, NOW, a.gaps);
+    const today = d[d.length - 1]!;
+    expect(today.availability).toBeCloseTo(1 - 1 / 15, 3);
+  });
+
+  it('is all null before the first arrival', () => {
+    const d = dailySeries(null, NOW, []);
+    expect(d).toHaveLength(WINDOW_DAYS);
+    expect(d.every((x) => x.availability === null)).toBe(true);
   });
 });
