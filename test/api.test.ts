@@ -158,3 +158,18 @@ describe('alias hostnames', () => {
     expect(res.status).toBe(200);
   });
 });
+
+describe('/api/btw', () => {
+  it('uses arch', async () => {
+    const res = await SELF.fetch('https://tyco.sh/api/btw');
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ arch: true });
+  });
+
+  it('says nothing else, ever', async () => {
+    // The restraint is the joke, exactly as with /api/is-it-dns. If a future
+    // edit adds a field here, it has misunderstood the endpoint.
+    const body = await (await SELF.fetch('https://tyco.sh/api/btw')).json<object>();
+    expect(Object.keys(body)).toEqual(['arch']);
+  });
+});

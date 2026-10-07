@@ -1,7 +1,7 @@
 import type { Route } from './types';
 import { blame, excuse, oncall, severity } from './api/baked';
 import { hire } from './api/hire';
-import { coffee, isItDns, itWasNotDns } from './api/jokes';
+import { btw, coffee, isItDns, itWasNotDns } from './api/jokes';
 import { snapshot } from './api/live';
 import { games, pz, rack } from './api/readings';
 import { uptime } from './api/uptime';
@@ -37,6 +37,12 @@ export const ROUTES: Route[] = [
     describe: 'returns 404, which is the answer',
     live: false,
     handler: itWasNotDns,
+  },
+  {
+    path: '/api/btw',
+    describe: 'btw',
+    live: false,
+    handler: btw,
   },
   {
     path: '/api/coffee',
