@@ -39,7 +39,7 @@ export const CAPABILITIES: ReadonlyArray<{ group: string; detail: string }> = [
 export const BIO: readonly string[] = [
   'Full-time dad and husband first; everything on this page happens after bedtime.',
   'Been taking computers apart since I was nine and never really stopped.',
-  'Plays hockey — #44 for the Puck Bunnies at Johnny’s IceHouse, and the Underachievers in MWIC.',
+  'Plays hockey — #44 for the Puck Bunnies and the Underachievers.',
   'Favorite show is The Expanse, which is where this domain got its name.',
 ];
 

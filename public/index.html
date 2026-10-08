@@ -428,79 +428,6 @@
         .stat .v.changed { animation: none; }
       }
 
-      /* Timeline -------------------------------------------------------- */
-
-      .tl {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-
-      .tl li {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 0.15rem;
-        padding: 0.4rem 0;
-      }
-
-      .tl .row {
-        display: flex;
-        align-items: baseline;
-        gap: 0.6rem;
-        flex-wrap: wrap;
-      }
-
-      .tl .role {
-        font-family: var(--mono);
-        font-size: 0.85rem;
-        color: var(--ink);
-      }
-
-      .tl .org {
-        font-size: 0.85rem;
-        color: var(--ink-dim);
-      }
-
-      .tl .when {
-        font-family: var(--mono);
-        font-size: 0.72rem;
-        color: var(--ink-faint);
-        margin-left: auto;
-        white-space: nowrap;
-      }
-
-      .tl .bar {
-        height: 5px;
-        border-radius: 3px;
-        background: var(--rule);
-        position: relative;
-        overflow: hidden;
-      }
-
-      .tl .bar span {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        background: var(--accent);
-        border-radius: 3px;
-        opacity: 0.75;
-      }
-
-      .tl li.current .bar span {
-        opacity: 1;
-      }
-
-      .tl-axis {
-        display: flex;
-        justify-content: space-between;
-        font-family: var(--mono);
-        font-size: 0.68rem;
-        color: var(--ink-faint);
-        margin-top: 0.4rem;
-        border-top: 1px solid var(--rule);
-        padding-top: 0.3rem;
-      }
-
       /* Elsewhere / footer ---------------------------------------------- */
 
       .elsewhere {
@@ -562,9 +489,7 @@
 
       <section id="experience">
         <h2>Experience</h2>
-        <ul class="tl" id="tl"></ul>
-        <div class="tl-axis" id="tl-axis"></div>
-        <p class="tagline" style="font-size: 0.9rem; margin-top: 1.1rem">
+        <p class="tagline" style="font-size: 0.95rem">
           <a href="/api/hire">The full record is the API</a>, or
           <a href="/resume.txt">read it as plain text</a>.
         </p>
@@ -629,7 +554,7 @@
       const BIO = [
         'Full-time dad and husband first; everything on this page happens after bedtime.',
         'Been taking computers apart since I was nine and never really stopped.',
-        'Plays hockey — #44 for the Puck Bunnies at Johnny’s IceHouse, and the Underachievers in MWIC.',
+        'Plays hockey — #44 for the Puck Bunnies and the Underachievers.',
         'Favorite show is The Expanse, which is where this domain got its name.',
       ];
 
@@ -947,93 +872,6 @@
         }
       }
 
-      // Experience as a strip, drawn from the same JSON the résumé endpoint
-      // serves — so it cannot disagree with /api/hire or the PDF.
-      async function loadTimeline() {
-        const list = document.getElementById('tl');
-        const axis = document.getElementById('tl-axis');
-
-        let work;
-        try {
-          ({ work } = await (await fetch('/api/hire')).json());
-        } catch {
-          return;
-        }
-        if (!work || !work.length) return;
-
-        const parse = (d) => {
-          if (!d) return null;
-          const [y, m] = String(d).split('-');
-          return Date.UTC(Number(y), m ? Number(m) - 1 : 0, 1);
-        };
-        const now = Date.now();
-        const rows = work
-          .map((w) => ({
-            role: w.position,
-            org: w.name,
-            from: parse(w.startDate),
-            to: w.endDate ? parse(w.endDate) : now,
-            current: !w.endDate,
-          }))
-          .filter((r) => r.from !== null)
-          .sort((a, b) => b.from - a.from);
-
-        const min = Math.min(...rows.map((r) => r.from));
-        const max = Math.max(...rows.map((r) => r.to));
-        const span = max - min || 1;
-        const pct = (t) => ((t - min) / span) * 100;
-
-        const fmt = (ms, open) =>
-          open
-            ? 'present'
-            : new Date(ms).toLocaleDateString(undefined, {
-                year: 'numeric',
-                month: 'short',
-                timeZone: 'UTC',
-              });
-
-        list.replaceChildren(
-          ...rows.map((r) => {
-            const li = document.createElement('li');
-            if (r.current) li.className = 'current';
-
-            const row = document.createElement('div');
-            row.className = 'row';
-            const role = document.createElement('span');
-            role.className = 'role';
-            role.textContent = r.role;
-            const org = document.createElement('span');
-            org.className = 'org';
-            org.textContent = r.org;
-            const when = document.createElement('span');
-            when.className = 'when';
-            when.textContent = `${fmt(r.from)} – ${fmt(r.to, r.current)}`;
-            row.append(role, org, when);
-
-            const bar = document.createElement('div');
-            bar.className = 'bar';
-            const fill = document.createElement('span');
-            fill.style.left = pct(r.from) + '%';
-            // Floor the width so a short role is still a visible mark.
-            fill.style.width = Math.max(1.5, pct(r.to) - pct(r.from)) + '%';
-            bar.append(fill);
-
-            li.append(row, bar);
-            return li;
-          }),
-        );
-
-        const y0 = new Date(min).getUTCFullYear();
-        const y1 = new Date(max).getUTCFullYear();
-        axis.replaceChildren();
-        for (const y of [y0, Math.round((y0 + y1) / 2), y1]) {
-          const s = document.createElement('span');
-          s.textContent = String(y);
-          axis.append(s);
-        }
-      }
-
-      loadTimeline();
       loadBand();
       setInterval(loadBand, 60000);
     </script>
