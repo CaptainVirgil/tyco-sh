@@ -112,6 +112,12 @@ npm run resume   # rebuild resume.txt + resume.pdf from resume.json
 npm run deploy
 ```
 
+`deploy` goes through `envchain cloudflare` when envchain is installed, so the
+Cloudflare token comes from the login keyring rather than being pasted into the
+environment or fetched from a password manager on every run. Without envchain
+it falls back to plain `wrangler deploy`, which reads `CLOUDFLARE_API_TOKEN`
+from the environment as usual.
+
 `data/resume.json` is the source of truth for the résumé — the JSON endpoint,
 the plaintext one and the PDF all derive from it, so they cannot drift apart.
 The build refuses to run while any placeholder text remains in the file.

@@ -9,7 +9,7 @@
   "packageManager": "npm@10.9.4",
   "scripts": {
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "deploy": "if command -v envchain >/dev/null 2>&1; then envchain cloudflare wrangler deploy; else wrangler deploy; fi",
     "resume": "node scripts/build-resume.js",
     "test": "vitest run",
     "check": "tsc --noEmit && prettier --check \"{src,test,scripts,data}/**/*.{ts,js,json}\"",
