@@ -428,6 +428,42 @@
         .stat .v.changed { animation: none; }
       }
 
+      /* Visitors ------------------------------------------------------- */
+
+      .spark {
+        display: flex;
+        gap: 2px;
+        height: 2.5rem;
+        align-items: flex-end;
+        margin-top: 0.75rem;
+      }
+
+      .spark .d {
+        flex: 1 1 0;
+        min-width: 2px;
+        border-radius: 1px 1px 0 0;
+        background: var(--accent);
+        opacity: 0.75;
+      }
+
+      /* A day nobody counted is a stub, not a zero-height bar: absent is not none. */
+      .spark .d.none {
+        background: var(--rule);
+        opacity: 1;
+        height: 2px;
+      }
+
+      .spark .d:hover {
+        opacity: 1;
+      }
+
+      .visits-note {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--ink-faint);
+        margin-top: 0.6rem;
+      }
+
       /* Elsewhere / footer ---------------------------------------------- */
 
       .elsewhere {
@@ -518,6 +554,13 @@
             <li><span class="desc">loading…</span></li>
           </ul>
         </details>
+      </section>
+
+      <section id="visitors">
+        <h2>Visitors</h2>
+        <div class="spark" id="spark" role="img" aria-label="Visitors per day, last 90 days"></div>
+        <div class="strip-axis"><span id="spark-from">90 days ago</span><span id="spark-to">yesterday</span></div>
+        <p class="visits-note" id="visits-note">counting…</p>
       </section>
 
       <section id="elsewhere">
@@ -884,7 +927,49 @@
         }
       }
 
+      // Visitors. Per-day uniques only: summed, they would count a returning
+      // visitor once per visit-day, so the page never shows a total of them.
+      async function loadVisitors() {
+        const note = document.getElementById('visits-note');
+        let v;
+        try {
+          v = await (await fetch('/api/visitors')).json();
+        } catch {
+          note.textContent = 'could not reach the API';
+          return;
+        }
+
+        const days = v.days || [];
+        const max = Math.max(1, ...days.map((d) => d.uniques ?? 0));
+        document.getElementById('spark').replaceChildren(
+          ...days.map((d) => {
+            const bar = document.createElement('div');
+            if (d.uniques === null) {
+              bar.className = 'd none';
+              bar.title = `${d.date}: not counted`;
+            } else {
+              bar.className = 'd';
+              bar.style.height = `${Math.max(4, (d.uniques / max) * 100)}%`;
+              bar.title = `${d.date}: ${d.uniques} visitors · ${d.requests} requests`;
+            }
+            return bar;
+          }),
+        );
+        const first = days.find((d) => d.uniques !== null);
+        if (first) document.getElementById('spark-from').textContent = first.date;
+        if (days.length) document.getElementById('spark-to').textContent = days.at(-1).date;
+
+        const n = (x) => (x == null ? '—' : x.toLocaleString());
+        const since = (c) => (c ? ` since ${c.since}` : '');
+        note.textContent =
+          `${n(v.requests)} requests served since ${v.since} · seen from ${n(v.countries)} countries · ` +
+          `the terminal view served ${n(v.terminal_views?.count)}×${since(v.terminal_views)} · ` +
+          `the teapot refused coffee ${n(v.teapot_refusals?.count)}× · ` +
+          `Cloudflare's count, bots very much included`;
+      }
+
       loadBand();
+      loadVisitors();
       setInterval(loadBand, 60000);
     </script>
   </body>

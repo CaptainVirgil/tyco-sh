@@ -12,6 +12,10 @@ declare global {
     interface Env {
       /** Shared secret for PUT /_ingest. Unset means ingest fails closed. */
       INGEST_TOKEN?: string;
+      /** Read-only analytics token for the traffic rollup. Unset means no rollup. */
+      CF_ANALYTICS_TOKEN?: string;
+      /** The zone the rollup reads. A secret only to keep account identifiers out of git. */
+      CF_ANALYTICS_ZONE?: string;
     }
   }
 }

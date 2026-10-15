@@ -3,6 +3,7 @@ import { isTerminal } from './negotiate';
 import { notFound } from './respond';
 import { rootText } from './root';
 import { lookup } from './routes';
+import { rollup } from './traffic';
 import type { Env } from './types';
 
 /** The one path that is not a GET. Deliberately outside /api — it is plumbing, not API. */
@@ -56,5 +57,11 @@ export default {
     }
 
     return env.ASSETS.fetch(request);
+  },
+
+  async scheduled(_controller, env, ctx): Promise<void> {
+    // Thrown, not swallowed: a failed rollup should show as a failed cron in
+    // the dashboard. The stored history is untouched either way.
+    ctx.waitUntil(rollup(env));
   },
 } satisfies ExportedHandler<Env>;

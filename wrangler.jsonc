@@ -20,6 +20,10 @@
   // it can choose HTML or plain text, and /api/* is all Worker. Everything
   // else — stylesheets, the PDF, favicons — is served straight off the asset
   // store without ever waking the Worker.
+  // Hourly traffic rollup — see src/traffic.ts. It writes only when a count
+  // moved, so in practice once or twice a day against the KV budget.
+  "triggers": { "crons": ["17 * * * *"] },
+
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",

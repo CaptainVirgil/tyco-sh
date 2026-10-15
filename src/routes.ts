@@ -5,6 +5,7 @@ import { btw, coffee, isItDns, itWasNotDns } from './api/jokes';
 import { snapshot } from './api/live';
 import { games, pz, rack } from './api/readings';
 import { uptime } from './api/uptime';
+import { visitors } from './api/visitors';
 import { yak } from './api/yak';
 import { json } from './respond';
 
@@ -103,6 +104,12 @@ export const ROUTES: Route[] = [
     describe: 'availability, measured from outside',
     live: true,
     handler: uptime,
+  },
+  {
+    path: '/api/visitors',
+    describe: 'visitors per day, as cloudflare counted them, bots and all',
+    live: false,
+    handler: visitors,
   },
   {
     path: '/api/rack',

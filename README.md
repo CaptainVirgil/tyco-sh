@@ -95,6 +95,11 @@ The jokes are only funny if the numbers are real, so:
   going to count open issues and pull requests until that measured zero
   everywhere — which would have published a confident `0` meaning "nothing to
   measure".
+- **`/api/visitors`** is Cloudflare's own analytics, read back hourly by a cron
+  and folded into one KV key, so nothing about a visitor is stored here and
+  history went back to launch day. Uniques are per day and never summed:
+  adding days counts a returning visitor once per day they came back. Bots
+  are in every number, and the response says so.
 - **`/api/rack`** is the one that isn't a joke. Inlet temperature, draw and fan
   speeds off a real BMC, and deliberately last in the list.
 

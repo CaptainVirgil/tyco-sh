@@ -20,13 +20,18 @@ const TERMINAL_AGENTS = [
 ];
 
 export function isTerminal(request: Request): boolean {
-  const ua = request.headers.get('User-Agent') ?? '';
-  if (TERMINAL_AGENTS.some((re) => re.test(ua))) return true;
-
-  // No UA at all is far more likely a script than a browser.
-  if (ua === '') return true;
-
+  if (isTerminalAgent(request.headers.get('User-Agent') ?? '')) return true;
   return prefers(request, 'text/plain') > prefers(request, 'text/html');
+}
+
+/**
+ * The User-Agent half of the decision, on its own so the traffic rollup can
+ * classify analytics rows — which carry a user agent but no Accept header —
+ * by the same rule that served them.
+ */
+export function isTerminalAgent(ua: string): boolean {
+  // No UA at all is far more likely a script than a browser.
+  return ua === '' || TERMINAL_AGENTS.some((re) => re.test(ua));
 }
 
 /**
