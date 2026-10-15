@@ -17,10 +17,9 @@ EXPERIENCE
 
   Director of IT and Innovations
   Grid-Line Transportation, Inc. — St John, IN · Dec 2025 – present
-  - Led a 3-person team to deliver Foundations TMS, an enterprise
-    Transportation Management System on the TALL stack (Tailwind, Alpine.js,
-    Laravel, Livewire) with PostgreSQL and Redis/Horizon, shipping a
-    functional MVP in 90 days.
+  - Led a 3-person team to deliver an enterprise transportation-management
+    system on the TALL stack (Tailwind, Alpine.js, Laravel, Livewire) with
+    PostgreSQL and Redis/Horizon, shipping a functional MVP in 90 days.
   - Engineered high-density on-premise server clusters with Dell PowerEdge
     R640/R740xd nodes, U.2 NVMe storage, and ZFS pools, hitting
     enterprise-tier IOPS for far less than standard vendor builds.
